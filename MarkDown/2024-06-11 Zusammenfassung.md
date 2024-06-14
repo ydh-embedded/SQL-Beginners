@@ -13,15 +13,15 @@ SELECT anr,aname,astadt FROM artikel ;
 -  am 23.07.1990 geliefert  
 ```sql
 SELECT anr FROM lieferung  
-WHERE ldatum = '23.07.1990' ;
+	WHERE ldatum = '23.07.1990' ;
 ```
 
 
 - Nun müssen die beiden Abfragen durch die Spalte die verglichen werden kann, verbunden werden (anr)
 ```sql
 SELECT anr,aname,astadt FROM artikel  
-WHERE anr = (SELECT anr FROM lieferung  
-        WHERE ldatum = '23.07.1990');
+	WHERE anr = (SELECT anr FROM lieferung  
+    WHERE ldatum = '23.07.1990');
 ```
 
 
@@ -31,8 +31,8 @@ WHERE anr = (SELECT anr FROM lieferung
 -- Lieferanten  
 ```sql
 SELECT LNr, lname FROM lieferant  
-WHERE status < (SELECT status FROM lieferant  
-WHERE LNr = 'L03');
+	WHERE status < (SELECT status FROM lieferant  
+	WHERE LNr = 'L03');
 ```
 
 
