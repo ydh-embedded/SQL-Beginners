@@ -2530,8 +2530,12 @@ where b.lnr is null;
 ### TAG 8:
 
   --pruefen mit
-
+````sql
  select * from lieferant
+````
+.
+
+
 
  -- Daten bearbeiten
 
@@ -2540,52 +2544,79 @@ where b.lnr is null;
  -- Einen Datensatz in eine Tabelle einfuegen
 
  -- 1. in der Reihenfoolge der Tabellendefinition
-
+````sql
  insert into lieferant values('L20','Krause',5,'Erfurt');
+````
+.
+
 
  -- 2. geaenderte Reihenfolge
-
+````sql
  insert into lieferant(lstadt,lnr,status,lname) values('Weimar','L21',5,'Schulze');
+````
+.
 
+````sql
  insert into lieferant values('Erfurt','L22','Krause',5,) -- Fehler
+````
+.
+
 
  -- 3. unbekannte Werte
-
+````sql
  insert into lieferant values('L22','Maria',5,null);
+````
+.
 
+````sql
  insert into lieferant (lnr,lname) values('L23','Horst');
+````
+.
+
 
  -- das geht nur wenn fuer alle Spalten die nicht ausgegeben werden, NULL
  -- Marken zugelassen sind
 
  -- BLOB laden (binary large objects)
-
+````sql
  create table medien 
  (nr int not null,
  bild varbinary(max) null,
  typ varchar(5) null);
+````
+.
+
 
  -- pruefen
-
+````sql
  select * from medien
 
 insert into medien values
 (1,(select * from openrowset(bulk 'c:\xml\colonel.jpg', single_blob) as c), '.jpg');
+````
+.
+
 
 -- weiter Moeglichkeiten zum Massenladen
-
+````sql
 select *
 into lieferung_hist
 from lieferung;
 
 insert into lieferung_hist select * from lieferung;
+````
+.
+
 
 --pruefen mit
-
+````sql
 select * from lieferung_hist
+````
+.
+
 
 -- Datenaenderung mitschneiden
-
+````sql
 create table spion
 (lfdnr int,
 wann datetime,
@@ -2599,10 +2630,16 @@ insert into lieferant
 output 1,getdate(),suser_name(),'Insert', inserted.lnr, inserted.lnr, null
        into spion
 values('L24','Boomer',5,'Weimar')
+````
+.
+
 
 -- pruefen mit
-
+````sql
 select * from spion
+````
+.
+
 
 -- aendern der Daten
 
@@ -2613,20 +2650,26 @@ select * from spion
 -- eine Update - Anweisung ohne where Klausel macht keinen Sinn
 
 -- die Maria zieht nach Gotha
-
+````sql
 update lieferant
 set lstadt = 'Gotha'
 where lnr = 'L22';
+````
+.
+
 
 -- der Status der Lieferanten die mehr als zwei mal geliefert haben 
 -- soll um 5 Punkte erhoeht werden
-
+````sql
 update lieferant
 set status = status + 5
 where lnr in(select lnr
              from lieferung
              group by lnr
              having count(lnr) > 2);
+````
+.
+
 
 -- mit Output arbeiten
 
@@ -2635,26 +2678,35 @@ where lnr in(select lnr
 -- deleted --> mit alten ungeaenderten Wert
 
 -- der Lieferant L23 zieht nach Urbich (weil Weltstadt)
-
+````sql
 update lieferant
 set lstadt = 'Urbich'
 output 2, getdate(), suser_name(), 'Update', 
         inserted.lnr, inserted.lstadt, deleted.lstadt
 into spion
 where lnr = 'L23';
+````
+.
+
 
 -- pruefen mit
-
+````sql
 select * from spion
+````
+.
+
 
 -- der Lieferant 23 zieht ploetzlich nach Dittelstedt
-
+````sql
 update lieferant
 set lstadt = 'Dittelstedt'
 output 3, getdate(), suser_name(), 'Update', 
         inserted.lnr, inserted.lstadt, deleted.lstadt
 into spion
 where lnr = 'L23';
+````
+.
+
 
 -- DELETE
 
@@ -2662,24 +2714,33 @@ where lnr = 'L23';
 -- sollte nicht ohne where Klausel verwendet werden
 
 -- L23 verlaesst fluchtartig die Firma
-
+````sql
 delete lieferant
 output 4, getdate(),suser_name(),'Delete',deleted.lnr,null,deleted.lnr
 into spion
 where lnr= 'L23'
+````
+.
+
 
 -- Alle Lieferanten ausser L05, die nicht geliefert haben sollen gloescht 
 -- werden
-
+````sql
 delete lieferant
 where lnr not in (select lnr from lieferung)
 and lnr <> 'L05';
+````
+.
+
 
 -- Loeschen von Datensaetzen einer Tabelle ohne Protokolierung
-
+````sql
 truncate table lieferung;
 
 select * from lieferant
+````
+.
+
 
 ---------------------------------------------------------------------------------
 
@@ -2740,10 +2801,13 @@ go
 --				auf sein Sparkonto ueberweisen
 
 -- Datenbank erstellen
-
+````sql
 create database standard;
 go
+````
+.
 
+````sql
 exec sp_helpdb standard;
 
 create table lieferant
@@ -2754,8 +2818,10 @@ status tinyint null,
 lstadt nvarchar(200) null
 );
 go
+````
+.
 
-
+````sql
 create table artikel
 (
 anr char(3) not null,
@@ -2766,7 +2832,10 @@ astadt nvarchar(200) not null,
 amenge int not null
 );
 go
+````
+.
 
+````sql
 create table lieferung
 (
 lnr nchar(3) not null, 
@@ -2775,11 +2844,12 @@ lmenge int not null,
 ldatum datetime not null
 );
 go
-
+````
+.
 --------------------------------------------------------------------------
 
 ### TAG 10:
-
+````sql
 insert into dbo.lieferant values('L01', 'Schmidt', 20, 'Hamburg');
 insert into dbo.lieferant values('L02', 'Jonas', 10, 'Ludwigshafen');
 insert into dbo.lieferant values('L03', 'Blank', 30, 'Ludwigshafen');
@@ -2810,11 +2880,17 @@ insert into dbo.lieferung values('L04', 'A02', 200, '09.08.90');
 insert into dbo.lieferung values('L04', 'A04', 300, '20.08.90');
 insert into dbo.lieferung values('L04', 'A05', 400, '21.08.90');
 
---pruefen mit
+````
+.
 
+--pruefen mit
+````sql
 select * from lieferant
 select * from lieferung
 select * from artikel
+````
+.
+
 
 -----------------------------------------------------------------------
 
@@ -2830,23 +2906,32 @@ select * from artikel
 -- einige Einschraenkungen (primary key, unique) erzeugen Indizes
 
 -- Primaerschluessel
-
+````sql
 alter table lieferant add constraint lnr_pk primary key(lnr);
+````
+.
+
  
 -- pruefen mit
-
+````sql
 exec sp_help 'lieferant'
+````
+.
+
 
 -- standardmaessig erzeugt der Primaerschluessel einen clustered 
 -- (gruppierten) Index
 
 -- Test
-
+````sql
 insert into lieferant values('L01','Kummer',5,'Erfurt'); -- L01 vorhanden
 insert into lieferant values('L06','Kummer',5,'Erfurt',0); -- geht
+````
+.
+
 
 -- Unique (Vorbereitung)
-
+````sql
 alter table lieferant add vers_nr varchar(20) null;
 
 update lieferant set vers_nr = 'ABC-12345-CC' where lnr = 'L01';
@@ -2857,11 +2942,17 @@ update lieferant set vers_nr = 'MNO-12345-CC' where lnr = 'L05';
 update lieferant set vers_nr = 'MNO-12345-CC' where lnr = 'L06';
 
 alter table lieferant add consraint versnr_unq unique(vers_nr)
+````
+.
+
 
 -- Test 
-
+````sql
 insert into lieferant values ('L07','Jach',5,'Erfurt','ABC-12345-CC') -- Fehler
 insert into lieferant values ('L07','Jach',5,'Erfurt','QRS-12345-CC'); -- geht
+````
+.
+
 
 -- fuer eine Tabelle kann es mehr als eine Unique Einschraenkung geben
 -- Unique laesst null Marken zu ( nur eine )
@@ -2871,32 +2962,50 @@ insert into lieferant values ('L07','Jach',5,'Erfurt','QRS-12345-CC'); -- geht
 
 -- Spalte vers_nr loeschen
 -- 1. das Constraint loeschen
-
+````sql
 alter table lieferant drop constraint versnr_unq;
+````
+.
+
 
 -- 2. Tabellenspalten loeschen
-
+````sql
 alter table lieferant drop drop column vers_nr;
+````
+.
+
 
 -- Default
 -- wenn fuer eine Spalte kein Wert angegeben wird soll ein Defaultwert gelten.
 -- auf Primaerschluesselspalten werden keine Default erstellt
-
+````sql
 alter table lieferant add constraint lstadt_def default 'Gotha' for lstadt;
+````
+.
+
 
 -- test
-
+````sql
 insert into lieferant values ('L06','Kulesch',5, default);
 insert into lieferant (lnr,lname,status) values ('L08','Schoeppach',5);
+````
+.
 
 
+````sql
 exec sp_help 'lieferant'
 select * from lieferant
+````
+.
+
 
 -- wenn eine NULL Marke aufgenommen werden muss, dann muessen sie diese
 -- explizit angegeben werden
-
+````sql
 insert into lieferant values ('L09','Warnecke',5, null);
+````
+.
+
 
 -- Check Einschränkung
 
@@ -2911,28 +3020,37 @@ insert into lieferant values ('L09','Warnecke',5, null);
 
 
 -- Lieferantennamen sollen mit einem Buchstaben beginnen
-
+````sql
 alter table lieferant add constraint lname_chk check(lname like '[A-Z]%');
 
 insert into lieferant values ('L10','8Sell',5, Jena); -- Fehler Name beginnt mit Zahl
 
 insert into lieferant values ('L10','Sell',15, default);
+````
+.
+
 
 -- der Statuswert darf nur zwischen 0 und 100 liegen
- 
+````sql
  alter table lieferant add constraint status_chk check(status between 0 and 100);
 
 insert into lieferant values ('L11','Sell',105,'Erfurt');  -- Fehler
 
 insert into lieferant values ('L11','Sell',99,'Erfurt');
+````
+.
+
 
 
 -- Fremdschluessel ( foreign key)
-
+````sql
 alter table lieferung add constraint lnr_fk foreign key(lnr) 
 						  references lieferant(lnr)
 						  on update cascade;
+````
+.
 
+````sql
 alter table lieferung add constraint anr_fk foreign key(anr) 
 						  references artikel(anr);  
                                                  
@@ -2940,57 +3058,93 @@ alter table lieferung add constraint anr_fk foreign key(anr)
 						  -- die Tabelle Artikel
 						  -- noch keinen Primaerschluessel
 						  -- besitzt
+````
+.
 
+````sql
 alter table artikel add constraint anr_pk primary key(anr);	
+````
+.
 
 
+````sql
 alter table lieferung add constraint anr_fk foreign key(anr)
 					  references artikel(anr);	    
                                           
                                                   -- jetzt sollte es gehen
+````
+.
+
 
 
 -- Primaerschluessel fuer die Tabelle Lieferung
 
 -- zusammengesetzter Primaerschluessel aus dem Spalten lnr, anr, ldatum
-
+````sql
 alter table lieferung add constraint lief_pk primary key(lnr,anr,ldatum);
+````
+.
+
 
 --  Beispiel fuer referentielle Integritaet (hat was mit dem foreign key zu tun)
-
+````sql
 insert into lieferung values('L44','A02',500, GETDATE());
+````
+.
+
 
 --	Fehler wegen referentieller Integritaet, den Lieferanten L44
 --	gibt es nicht !!!
 
 -- Opertationregel kaskadierndes aendern zwischen Lieferant und Lieferung
-
+````sql
 select * from lieferant as a join lieferung as b on a.lnr = b.lnr
 where a.lnr = 'L04';
+````
+.
 
+````sql
 update lieferant set lnr = 'L06' where lnr = 'L04';
+````
+.
 
+````sql
 select * from lieferant as a join lieferung as b on a.lnr = b.lnr
 where a.lnr = 'L04';		
-                                -- leer weil L04 nicht mehr vorhanden
-
+                                
+````
+.
+-- leer weil L04 nicht mehr vorhanden
+````sql
 select * from lieferant as a join lieferung as b on a.lnr = b.lnr
 where a.lnr = 'L06';		
-                                -- dem Liefranten wurde die lnr
+                                
+````
+.
+-- dem Liefranten wurde die lnr
 				-- geaendert und seine Lieferungen wurden
 				-- ihm wieder zugeordnet
 
-
+````sql
 exec sp_help 'lieferant'
 select * from lieferant
 delete lieferant
 where lnr = 'L11'
+````
+.
 
 
+````sql
 alter table lieferung drop constraint lief_pk;
+````
+.
 
+````sql
 alter table lieferung alter column lnr char(3) not null;
 alter table lieferung alter column anr char(3) not null;
+````
+.
+
 
 -----------------------------------------------------------------------------
 
