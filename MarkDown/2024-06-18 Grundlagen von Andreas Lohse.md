@@ -5461,21 +5461,30 @@ on schema::verkauf
 to dieter;
 
 -- Delete fuer die Tabelle Lieferung fuer Frank und Dieter erlauben
-
+```sql
 grant delete
 on verkauf.lieferung
 to dieter;
+```
+.
+
 
 -- den Mitarbeitern von Verwaltung alle Rechte auf die Tabellen
 -- Lieferant, Artikel und Lieferung zuweisen
-
+```sql
 grant insert, update, select, delete
 on schema::verkauf
 to verwaltung;
+```
+.
 
+```sql
 grant insert, update, select, delete
 on schema::lager
 to verwaltung;
+```
+.
+
 
 
 ### TAG 20:
@@ -5562,228 +5571,378 @@ Speichern Sie Ihre Skripte in der Freigabe "Datenaustausch\SQL\Berechtigungen" a
 Im Dateinamen sollte klar Ihr Name zu erkennen sein.
 
 Mein Vorschlag:
-
+```bash
 ersterbuchstabevorname_nachname_zugriff.sql
+
+```
+.
 
 Ich wuensche Ihnen viel Erfolg
 
 */
 
 Loesung
-
+```sql
 use master;
 go
+```
+.
+
 
 -- Uberprüfen ob ich Systemadmin bin --
-
+```sql
 select a.role_principal_id, b.name as [Rollenname], a.member_principal_id,
 							c.name as [Mitgliedsname]
 from sys.server_role_members as a join sys.server_principals as b
 on a.role_principal_id = b.principal_id
 join sys.server_principals as c
 on a.member_principal_id = c.principal_id;
+```
+.
+
 
 -- Wenn das nicht der Fall ist: Verbinden mit den 5Qt Server als SA --
-
+```sql
 alter server role sysadmin add member [sql16\student];
+
+```
+.
 
 -- Danach wieder als Student mit dem 5QL Server verbinden --
 
 --Test- Datenbank und Test- Logins für den Lehrling erstellen:
-
+```sql
 create database uebung;
 
 go
+```
+.
+```sql
 create login willi1 with password = 'Pa$Sw0rd';
 create login willi2 with password = 'Pa$Sw0rd';
 go
+```
+.
+
 
 -- Login und Serverberechtigungen für den Stellvertreter --
-
+```sql
 create login [sql16\ralf] from windows;
 alter server role dbcreator add member [sql16 \ralf];
 alter server role diskadmin add member [sql16iralf];
 alter server role securityadmin add member [sql16\ralf];
 
+```
+.
+
 -- Datenbankrollen für den Stellvertreter --
+```sql
 use standard;
 go
+```
+.
 
 create user ralf for login [sql16\ralf];
 alter role db_owner add member ralf
-
+```sql
 use urbiworks;
 go
+```
+.
 
+```sql
 create user ralf for login [sql16\ralf];
 alter role db_owner add member ralf;
 go
+```
+.
+
 
 use master;
 
 -- Logins für die Abteilungen erstellen --
-
+```sql
 create login [sqll6\office] from windows;
 create login [sql16\custumer _service] from windows;
 create login [sql16\Purchase] from windows;
 
--- Logins für Außendienstmitarbeiter --
+```
+.
 
+-- Logins für Außendienstmitarbeiter --
+```sql
 create login Acksteiner with password = 'Pa$$w0rd';
 create login Reichardt with password = 'Pa$$w0rd';
 create login Grohall with password = 'Pa$$w0rd';
 create login Schröter with password = 'Pa$$w0rd';
 go
+```
+.
+
 
 -----------------------------------------------------------------------------
 
 -- Zugriff auf Datenbank Urbiworks erteilen --
-
+```sql
 use UrbiWorks;
 go
+```
+.
 
+```sql
 create user Office from login [sql16\office]
 with default_schema = office;
 
+```
+.
+
+```sql
 create user Purchase from login [sql16\purchase]
 with default_schema = Stock;
 
+```
+.
+
+```sql
 create user Kundendienst from login [sql16\custumer_service]
 with default_schema = Lager;
 go
+```
+.
+
 
 -- Den Lehrlingen den Zugriff auf die Datenbank UrbiWorks verweigern --
-
+```sql
 create user Neuer from login [sql16\neuer];
 create user [Alter] from login [sql16\alter];
 go
+```
+.
+
+```sql
 deny connect to neuer;
 deny connect to [alter];
 go
+```
+.
+
 
 -- Den Lehrlingen den Zugriff auf die Datenbank Standard verweigern --
-
+```sql
 use standard;
 go
+```
+.
 
+```sql
 create user Neuer from login [sql16\neuer];
 create user [Alter] from login [sql16\alter];
 go
+```
+.
 
+```sql
 deny connect to neuer;
 deny connect to [alter];
 go
+```
+.
+
+
 
 -- Für die Lehrlinge die Database Email ermöglichen --
+```sql
 use msdb;
 go
+```
+.
 
+```sql
 create user Neuer from login [sql16\neuer];
 create user [Alter] from login [sql16\alter];
 
 alter role databasemailuserrole add member Neuer;
 alter role databasemailuserrole add member [Alter];
 
+```
+.
+
 -- Für die Lehrlinge die Datenbank Uebung vorbereiten --
+```sql
 use uebung
 go
+```
+.
 
+```sql
 create user Neuer from login [sql16\neuer];
 create user [Alter] from login [sql16\alter];
 go
+```
+.
 
+```sql
 alter role db_owner add member neuer;
 alter role db_owner add member [alter];
 go
+```
+.
 
+```sql
 create user Wil1li1 from login [willi1];
 create user Willi2 from login [Willi12];
 go
+```
+.
+
 
 -- Berechtigungen für Kerstin Ziegler --
-
+```sql
 use master;
 go
+```
+.
 
+```sql
 create login [sql16\Ziegler] from windows;
 deny create any database to [sql16\ziegler];
 deny alter any database to [sql16\ziegler];
 go
+```
+.
 
+```sql
 use urbiworks;
 go
+```
+.
 
+```sql
 create user Ziegler from login [sql16\Ziegler];
 go
+```
+.
 
+```sql
 alter role db_ddladmin add member ziegler;
 grant alter any schema to ziegler;
 grant alter any user to ziegler;
 go
+```
+.
+
 
 -- Außendienstmitarbeiter --
-
+```sql
 create user Acksteiner from login Acksteiner;
 create user Reichardt from login Reichardt;
 create user Grohall from login Grohall;
 create user Schröter from login Schröter;
 go
+```
+.
 
+```sql
 create role aussendienst;
 go
+```
+.
 
+```sql
 alter role aussendienst add member acksteiner´;
 alter role aussendienst add member Reichardt;
 alter role aussendienst add member grohall;
-alter role aussendienst add member schröter;
+alter role aussendienst add member schreder;
 
+```
+.
+```sql
 grant select, insert, update
 on office.lieferant to aussendienst;
 
+```
+.
+
+```sql
 grant insert, update, delete, delete
 on office.artikel to aussendienst;
 
+```
+.
+
+```sql
 grant select on schema::stock to aussendienst;
 
--- Abteilung Office --
+```
+.
 
+-- Abteilung Office --
+```sql
 grant select, insert, update, delete
 on schema::office to Office;
 
+```
+.
+
+```sql
 grant select
 on schema::stock to Office;
 go
+```
+.
+
 
 -- Abteilung Kundendienst --
-
+```sql
 grant select, insert, update
 on stock.lieferung to kundendienst;
 go
+```
+.
+
 
 -- Abteilung Purchase --
-
+```sql
 grant insert, update
 on office.artikel to purchase;
 
+```
+.
+
+```sql
 grant select
 on schema::office to purchase;
 
+```
+.
+
+```sql
 grant select
 on schema::stock to purchase;
 
+```
+.
+
+```sql
 grant alter
 on schema::stock to purchase
 grant create view to purchase;
 go
+```
+.
+
 
 
 ------
 
 ### TAG 21:
 
-
+```sql
 use master
 go
+```
+.
+
 
 -- Sichern und Wiederherstellen von Datenbanken
 -- gesichert koennen alle benutzerdefinierten Datenbanken werden und 
@@ -5823,9 +5982,12 @@ go
 -- und umgekehrt unterbricht die Linie
 
 ------
-
+```sql
 use master;
 go
+```
+.
+
 
 -- wohin sichern
 -- direckt auf Bandlaufwerk (nicht mehr empfohlen weil alt)
@@ -5836,115 +5998,199 @@ go
 -- empfohlen wird ein sogenanntes Sicherungsdevice
 --			es handelt sich um einen Namen fuer Speicherort
 -- Sicherungsdevice erstellen
-
+```sql
 exec sp_addumpdevice 'disk', 'master_sicher', 'g:\dbbackup\master_sicher.bak';
 go
+```
+.
+
 
 --------
 
 -- Master Datenbank sichern
-
+```sql
 backup database master to master_sicher with name = 'Master_voll';
+
+```
+.
 
 -- MSDB wurde grafisch gesichert
 
 -- Datenbank Standard sichern
 
 -- 1. vollstaendige Datenbanksicherung
-
+```sql
 backup database standard to standard_sicher with name = 'standard_voll';
 go
+```
+.
 
+```sql
 use standard 
 go
+```
+.
 
+```sql
 insert into verkauf.lieferant values('L20','Krause',5,'Erfurt');
 
--- sichern des Protokolls
+```
+.
 
+-- sichern des Protokolls
+```sql
 backup log standard to standard_sicher with name = 'Protokoll';
 
----
+```
+.
 
+---
+```sql
 insert into verkauf.lieferant values('L21','Pausine',5,'Erfurt');
 
--- sichern des Protokolls
+```
+.
 
+-- sichern des Protokolls
+```sql
 backup log standard to standard_sicher with name = 'Protokoll';
+
+```
+.
 
 ---
-
+```sql
 insert into verkauf.lieferant values('L22','Mit### TAG',5,'Erfurt');
 
--- sichern des Protokolls
+```
+.
 
+-- sichern des Protokolls
+```sql
 backup log standard to standard_sicher with name = 'Protokoll';
+
+```
+.
 
 
 -- differentielle Datenbanksicherung
-
+```sql
 backup database standard to standard_sicher 
 with name = 'standard_diff', differential;
 go
+```
+.
 
+```sql
 insert into verkauf.lieferant values('L23','Fruehstueck',5,'Erfurt');
 
--- sichern des Protokolls
+```
+.
 
+-- sichern des Protokolls
+```sql
 backup log standard to standard_sicher with name = 'Protokoll';
 
----
+```
+.
 
+---
+```sql
 insert into verkauf.lieferant values('L24','Brunch',5,'Erfurt');
 
--- sichern des Protokolls
+```
+.
 
+-- sichern des Protokolls
+```sql
 backup log standard to standard_sicher with name = 'Protokoll';
+
+```
+.
 
 ---
-
+```sql
 insert into verkauf.lieferant values('L25','Kaffee',5,'Erfurt');
 
--- sichern des Protokolls
+```
+.
 
+-- sichern des Protokolls
+```sql
 backup log standard to standard_sicher with name = 'Protokoll';
 
--- sichern des Protokollfragments (auf Master Datenbank)
+```
+.
 
+-- sichern des Protokollfragments (auf Master Datenbank)
+```sql
 use master;
 go
+```
+.
 
+```sql
 backup log standard to standard_sicher with name = 'fragment', norecovery;
 go
+```
+.
+
 
 -- Sicherungen ueberpruefen
 
 -- 1. ist der Medienheader intakt
-
+```sql
 restore verifyonly from standard_sicher;
 
--- 2. allgemeine Angaben ueber das Sicherungsmedium
+```
+.
 
+-- 2. allgemeine Angaben ueber das Sicherungsmedium
+```sql
 restore labelonly from standard_sicher;
+```
+.
+
+
 
 -- 3. Aufbau der gesicherten Datenbank
-
+```sql
 restore filelistonly from  standard_sicher;
+```
+.
+
+
 
 -- 4. Sicherungshistory anzeigen (Sicherungsverlauf)
-
+```sql
 restore headeronly from standard_sicher;
+```
+.
+
+
 
 -- Wiederherstellen der Datenbank Standard
 
 -- vollstaendige Sicherung wiederherstellen
-
+```sql
 restore database standard from standard_sicher with file = 1, norecovery;
 go
+```
+.
 
+
+```sql
 restore headeronly from standard_sicher;
+```
+.
+
+
 
 ---
+```sql
+
+```
+.
 
 restore database standard from standard_sicher with file = 6, norecovery;
 go
@@ -5952,21 +6198,41 @@ go
 restore headeronly from standard_sicher;
 
 ---
-
+```sql
 restore log standard from standard_sicher with file = 6, norecovery;
 go
+```
+.
 
+
+```sql
 restore log standard from standard_sicher with file = 7, norecovery;
 go
+```
+.
 
+
+```sql
 restore log standard from standard_sicher with file = 8, recovery;
 go
+```
+.
+
+
 
 -- Datenbanken wiederhergestellt
-
+```sql
 use standard;
 go
+```
+.
+
+
+```sql
 select * from verkauf.lieferant;
+```
+.
+
 
 -- Aufgaben automatisieren
 
