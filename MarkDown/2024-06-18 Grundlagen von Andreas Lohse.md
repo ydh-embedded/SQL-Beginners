@@ -3151,70 +3151,103 @@ alter table lieferung alter column anr char(3) not null;
 ### TAG 12:
 
 -- Dateigruppen erstellen
-
+````sql
 use master
 go
+````
+.
+
 
 -- 1. Dateigruppen (Aktiv, Passiv und Indexe) erstellen
-
+````sql
 alter database standard add filegroup passiv;
 go
+````
+.
 
+````sql
 alter database standard add filegroup aktiv;
 go
+````
+.
 
+````sql
 alter database standard add filegroup indexe;
 go
+````
+.
+
 
 -- 2. Datenbankdateien erstellen und den entsprechenden Dateigruppen 
 --	  zuordnen.
-
+````sql
 alter database standard 
 add file (name = standard_passiv,
 			filename = 'j:\db.daten1\standard_passiv.ndf',
 			size = 20 GB,
 			maxsize = 25 GB,
 			filegrowth = 5%) to filegroup passiv;
+````
+.
 
+````sql
 alter database standard 
 add file (name = standard_aktiv,
 			filename = 'k:\db.daten2\standard_aktiv.ndf',
 			size = 20 GB,
 			maxsize = 25 GB,
 			filegrowth = 5%) to filegroup aktiv;
+````
+.
 
+````sql
 alter database standard
 add file (name = standard_index,
 			filename = 'l:\indexe\standard_index.ndf',
 			size = 10 GB,
 			maxsize = 20 GB,
 			filegrowth = 1 GB) to filegroup indexe;
+````
+.
+
 
 -- Damit Datenbankbenutzer die berechtigt sind in der Datenbank
 -- Tabellen, Sichten, Prozeduren oder Funktionen zu erstellen, diese nicht
 -- aus Versehen in der Dateigruppe PRIMARY erstellen, machen wir
 -- jetzt die Dateigruppe Passiv zur Default Dateigruppe
-
+````sql
 alter database standard modify filegroup passiv default;
 go
+````
+.
+
 
 -- wunsch von Herrn Ruhland
 -- Maxsize von der Datei in PRIMARY und des Transaktionsprotokol
 -- aendern
 
 -- pruefen mit
-
+````sql
 exec sp_helpdb standard;
+````
+.
 
+````sql
 alter database standard
 modify file (name = standard,
 			 maxsize = 20 GB);
 go
-
+````
+.
+````sql
 alter database standard
 modify file (name = standard_log,
 			 maxsize = 15 GB);
 go
+````
+.
+
+
 
 -- Tabelle in die entsprechende Dateigruppe verschieben
 -- Tabellen koennen nur in eine andere Dateigruppe verschoben werden in dem
@@ -3222,60 +3255,100 @@ go
 -- neu erstellt wird und ihm der Dateigruppenname zugewiesen wird
 
 -- die Tabellen Lieferant und Artikel nach 'Passiv' verschieben
-
-
+````sql
 use standard
 go
+````
+.
+
+
 
 -- Primaerschluessel loeschen
-
+````sql
 alter table lieferung drop constraint lnr_fk;
+````
+.
+````sql
 
 alter table lieferung drop constraint anr_fk;
+````
+.
+
 
 -- 1. Tabelle Lieferant
-
+````sql
 alter table lieferant drop constraint lnr_pk;
 go
+````
+.
+````sql
 
 alter table lieferant add constraint lnr_pk primary key(lnr) on passiv;
 
+````
+.
+
 
 -- 2. Tabelle Artikel
-
+````sql
 alter table artikel drop constraint anr_pk;
 go
+````
+.
 
+````sql
 alter table artikel add constraint anr_pk primary key(anr) on passiv;
+
+````
+.
 
 
 -- 3. Tabelle Lieferung
-
+````sql
 alter table lieferung drop constraint lief_pk;
 go
+````
+.
+````sql
 
 alter table lieferung add constraint lief_pk primary key(lnr,anr,ldatum) on aktiv;
 
--- Fremdschluessel
+````
+.
 
+-- Fremdschluessel
+````sql
 alter table lieferung add constraint lnr_fk foreign key(lnr)
 			references lieferant(lnr) on update cascade;
 go
-
+````
+.
+````sql
 alter table lieferung add constraint anr_fk foreign key(anr)
 			references artikel(anr);
 go
-
+````
+.
+````sql
 exec sp_help lieferant;
+````
+.
+
+
+
 
 --------------------------------------------------------------------
 
 ### TAG 13:
 
 Übung 6
- 
+
+````sql
 use master
 go
+````
+.
+````sql
 create database forschung
 on primary
 	(name = forschung_sk,
@@ -3302,25 +3375,38 @@ log on
 	maxsize = 25MB,
 	filegrowth = 5%);
 go
+````
+.
 
-
+````sql
 
 alter database forschung
 modify filegroup passiv default;
 go
+````
+.
 
+````sql
 use forschung;
 go
+````
+.
 
+
+````sql
 create table orte
 (ortid int not null constraint ortid_ps primary key,
 plz char(5),
 ortsname nvarchar(100),
 constraint orte_unq unique(plz,ortsname));
 go
+````
+.
+
+
 
 -- Stammdatensaetze Orte fuer die Abteilungen
-
+````sql
 insert into orte values(1,'98527','Suhl');
 insert into orte values(2,'99082','Erfurt');
 insert into orte values(3,'99423','Weimar');
@@ -3329,7 +3415,9 @@ insert into orte values(5,'99868','Gotha');
 insert into orte values(6,'99734','Nordhausen');
 insert into orte values(7,'99610','S�mmerda');
 go
-
+````
+.
+````sql
 create table abteilung
 (abt_nr char(3) not null constraint abt_nr_ps primary key
 			  constraint abt_nr_chk check((abt_nr like 'a[1-9][0-9]'
@@ -3339,10 +3427,15 @@ create table abteilung
  ortid int not null constraint aortid_fs references orte(ortid)
 					constraint aortid_chk check(ortid in(1,2,3,4,5,6,7)));
 go
+````
+.
 
+````sql
 insert into abteilung values('a1','Forschung',1);
 go
-
+````
+.
+````sql
 create table projekt
 (pr_nr char(4) not null constraint pr_nr_ps primary key 
 			 constraint pr_nr_chk check((pr_nr like 'p[1-9][0-9][0-9]'
@@ -3352,10 +3445,15 @@ create table projekt
  pr_name nchar(50) not null constraint pr_name_chk check(pr_name like '[A-Z]%'),
  mittel money not null constraint mittel_chk check(mittel between 1 and 2000000));
 go
-
+````
+.
+````sql
 insert into projekt values('p1','Mondlandung', 600000);
 go
+````
+.
 
+````sql
 create table mitarbeiter
 (m_nr integer not null identity(1000,1) constraint m_nr_ps primary key,
  m_name nchar(50) not null constraint m_name_chk check(m_name like '[A-Z]%'),
@@ -3366,11 +3464,18 @@ create table mitarbeiter
  abt_nr char(3) null constraint abt_nr_fs references abteilung(abt_nr)
 								  on update cascade);
 go
+````
+.
+
+
+````sql
 
 insert into mitarbeiter values('M�ller','Bernd',1,'Hochheimer Stra�e 2',
 							   '18.09.1999', 'a1');
 go
-
+````
+.
+````sql
 create table arbeiten
 (m_nr integer not null constraint m_nr_fs references mitarbeiter(m_nr)
 									on update cascade,
@@ -3381,10 +3486,15 @@ create table arbeiten
 							 check(einst_dat >= dateadd(dd,-7,getdate())),
  constraint arbeiten_ps primary key(m_nr,pr_nr)) on aktiv;
 go
+````
+.
 
+````sql
 insert into arbeiten values(1000,'p1','Organisator',getdate());
 go
-
+````
+.
+````sql
 create table telefon
 (m_nr integer not null constraint m_nr_fk references mitarbeiter(m_nr)
 									on update cascade,
@@ -3392,9 +3502,17 @@ create table telefon
  tel_nr char(10) not null,
 constraint tel_ps primary key(vorw, tel_nr));
 go
+````
+.
+````sql
 
 insert into telefon values(1000, '0361', '563399');
 go
+````
+.
+
+
+
 
 Übung Ende
 
@@ -3432,32 +3550,44 @@ schneller zu machen
 
 -- die create view - Anweisung darf nicht mit anderen SQL Anweisungen in einem
 -- Stapel stehen! mit 'go' seperieren
-
+````sql
 create view hamb_lief
 as
 select lnr, lname, lstadt
 from lieferant
 where lstadt = 'Hamburg';
 go
+````
+.
+
 
 -- wo werden Sichten gespeichert?
-
+````sql
 select * from sys.objects where object_id = object_id('hamb_lief');
 select * from sys.views where object_id = object_id('hamb_lief');
 
--- wo liegt die Sichtdefinition
+````
+.
 
+-- wo liegt die Sichtdefinition
+````sql
 select * from sys.sql_modules where object_id = object_id('hamb_lief');
 
---oder
+````
+.
 
+--oder
+````sql
 exec sp_helptext 'hamb_lief';
 
 select * from hamb_lief;
 go
+````
+.
+
 
 -- view definition verschluesseln
-
+````sql
 alter view hamb_lief
 with encryption
 as
@@ -3465,30 +3595,45 @@ select lnr, lname, lstadt
 from lieferant
 where lstadt = 'Hamburg';
 go
+````
+.
+
  
  --pruefen mit
-
+````sql
 exec sp_helptext 'hamb_lief';
 
--- rueckgaengig mit
+````
+.
 
+-- rueckgaengig mit
+````sql
 alter view hamb_lief
 as
 select lnr, lname, lstadt
 from lieferant
 where lstadt = 'Hamburg';
 go
+````
+.
+
 
 --  Sichten mit Join
-
+````sql
 create view lieflief
 as
 select a.lnr, lname, status, lstadt, anr, lmenge, ldatum
 from lieferant as a join lieferung as b on a.lnr = b.lnr;
 go
+````
+.
+````sql
 
 select * from lieflief;
 go
+````
+.
+
 , 
 -- Datenaenderung ueber Sichten (Insert, Update, Delete)
 
@@ -3496,7 +3641,7 @@ go
 -- sind nicht moeglich oder nur mit INSTEAD - Trigger moeglich
 
 --Insert
-
+````sql
 insert into hamb_lief values('L30','Kirsten','Hamburg');
 
 select * from hamb_lief;
@@ -3507,9 +3652,12 @@ insert into hamb_lief values('L31','Meier','Weimar');
 
 select * from hamb_lief;
 select * from lieferant;
+````
+.
+
 
 -- Sicht aendern with check option
-
+````sql
 alter view hamb_lief
 as
 select lnr, lname, lstadt
@@ -3517,14 +3665,20 @@ from lieferant
 where lstadt = 'Hamburg'
 with check option;
 go
+````
+.
 
+````sql
 
 insert into hamb_lief values('L32','Lauch','Weimar');  --Fehler
 
 insert into hamb_lief values('L32','Lauch','Hamburg'); -- Geht
 
-----
+````
+.
 
+----
+````sql
 create view hamb_lief1
 as
 select lnr, lname
@@ -3532,33 +3686,48 @@ from lieferant
 where lstadt = 'Hamburg'
 with check option;
 go
+````
+.
+````sql
 
 select * from hamb_lief1;
 
 insert into hamb_lief1 values('L33','Maria','Hamburg');  -- geht nicht
 
 insert into hamb_lief1 values('L33','Maria');		 -- geht nicht
+````
+.
+
 
 -- Update
-
+````sql
 update hamb_lief
 set lstadt = 'Erfurt'
 where lnr = 'L32';				-- Fehler wegen der with check option
 
+````
+.
+````sql
 update hamb_lief
 set lname = 'Kaltduscher'
 where lnr = 'L32';				-- geht
 
 
 select * from hamb_lief;
+````
+.
+
 
 /*
 was wurde in der Datenbank gemacht
-
+````sql
 update lieferant
 set lname = 'Kaltduscher'
 where lnr = 'L32'				-- kommt von Update
 and lstadt = 'Hamburg';			        -- kommt von der Sicht
+````
+.
+
 */
 
 -- DELETE
@@ -3567,29 +3736,41 @@ and lstadt = 'Hamburg';			        -- kommt von der Sicht
 -- weil
 -- delete hamb_lief;			        -- loescht alle Hamburger
 --						-- Lieferanten
-
+````sql
 delete hamb_lief
 from hamb_lief as a left join lieferung as b on a.lnr = b.lnr
 where b.lnr is null;
+````
+.
+
 
 -- loescht alle Hamburger Lieferanten ohne Lieferung
-
+````sql
 select * from Hamb_lief;
+````
+.
+
 
 ----------------------------------------------------------------------
 
 ### TAG 15:
-
+````sql
 use standard
 go
+````
+.
 
+````sql
 create table indtest
 (id int not null,
 namen varchar(100) not null,
 vname varchar(100) null,
 ort varchar(200) not null);
 go
+````
+.
 
+````sql
 declare @x int = 1;
 while @x <= 1000000
 begin
@@ -3601,19 +3782,34 @@ begin
 	--set @x = @x +1;
 end;
 go
+````
+.
+
 
 ----
-
+````sql
 select count(*) from indtest;
+````
+.
+````sql
 
 select * from indtest;
+````
+.
 
+````sql
 select * from sys.indexes where object_id = object_id('indtest)';
 
--- Fragmentierungsgrad des Haufens
+````
+.
 
+-- Fragmentierungsgrad des Haufens
+````sql
 select * from
 sys.dm_db_index_physical_stats(db_id(),object_id('indtest'),null,null,null);
+
+````
+.
 
 
 -- eine Tabelle kann maxsimal 1000 Indizes besitzen
@@ -3621,77 +3817,125 @@ sys.dm_db_index_physical_stats(db_id(),object_id('indtest'),null,null,null);
 
 -- Besitzt eine Tabelle keinen gruppierten Index bleiben die Daten in der
 -- Speicherorganisationsform 'Haufen'
-
-
+````sql
 create index vname_ind on indtest(vname);
 
--- welche Indizes gibt es fuer die Tabelle
+````
+.
 
+
+-- welche Indizes gibt es fuer die Tabelle
+````sql
 select * from sys.indexes where object_id = object_id('indtest)';
 
--- Fragmentierungsgrad des Haufens
+````
+.
 
+-- Fragmentierungsgrad des Haufens
+````sql
 select * from
 sys.dm_db_index_physical_stats(db_id(),object_id('indtest'),null,null,null);
+````
+.
 
+````sql
 select * from indtest where vname like '%3099%';
+````
+.
+
 
 -- sobald ein gruppierter Index erstellt wird, wird die physische Reihenfolge
 -- der Datensaetze entsprechend der indizierten Reihenfolge geaendert
 
 -- Primaerschluessel fuer die Tabelle Indtest
-
+````sql
 alter table indtest add constraint id_pk primary key(id);
+````
+.
 
+````sql
 select * from indtest where vname like '%3099%';
+````
+.
 
+````sql
 select * from indtest where id between 3055 and 10344;
+````
+.
+
 
 ----
 
 -- welche Indizes gibt es fuer die Tabelle
-
+````sql
 select * from sys.indexes where object_id = object_id('indtest)';
+````
+.
+
 
 -- Fragmentierungsgrad des Haufens
-
+````sql
 select * from
 sys.dm_db_index_physical_stats(db_id(),object_id('indtest'),null,null,null);
+````
+.
+
 
 ----
-
+````sql
 select astadt
 from artikel
 where aname = 'Schraube' and astadt like '%m%';
+````
+.
+
 
 -- zusammengesetzter Index
-
+````sql
 create index aname_astadt_ind on artikel(aname,astadt);
+````
+.
 
+````sql
 select aname, astadt, amenge
 from artikel
 where farbe = 'rot';
+````
+.
+
 
 -- abgedeckter Index (der Index deckt die Abfgrage vollstaendig ab)
-
+````sql
 create index farbe_art on artikel(farbe, aname, astadt, amenge);
+````
+.
+
 
 -- Index mit eingeschlossenen Spalten
 -- wird verwendet wenn die Anzahl der Spalten des zusammengesetzten Index
 -- 16 Spalten überschreitet und/oder die Laenge der Spaltenwerte groesser
 -- 900 Byte ist.
-
+````sql
 create index farbe_art_inc on artikel(farbe) include (aname, astadt, amenge);
+````
+.
+````sql
 
 select aname, astadt, amenge
 from artikel
 where farbe = 'rot';
+````
+.
+
 
 -- damit ist der zusammengesetzte Index ueberfluessig und kann geloescht werden
-
+````sql
 drop index artikel.farbe_art;
 
 select * from artikel
+````
+.
+
 
 -- Extras SQL Server Profiler 
 
@@ -3701,17 +3945,26 @@ select * from artikel
 -- wichig dabei ist die Spalte avg_fragmentation_in_percent
 
 -- bei Fragmetation bis 30 % wird der Index neu Organisiert
-
+````sql
 alter index farbe_art_inc on artikel reorganize;
+````
+.
+
 
 -- bei Fragmentation ueber 30 % wird der Index neu gebildet
-
+````sql
 alter index farbe_art_inc on artikel rebuild;
+````
+.
+
 
 ----
-
+````sql
 use standard;
 go
+````
+.
+
 
 -- Programmieren mit Tranact "SQL"
 
@@ -3725,18 +3978,24 @@ go
 -- Anweisungsbloecke
 -- werden verwendet in einer WHILE - Schleife, im IF und ELSE Zweig einer
 -- IF/ELSE - Anweisung und im Body von benutzerdefinierten Funktionen
-
+````sql
 begin
 	select @@version;
 	select * from lieferant
 end;
+````
+.
+
 
 -- Meldungen
 -- einfache Meldungen mit PRINT
 -- Print gibt nur Zeichenfolgen zurück
-
+````sql
 print 'Heute ist' + datename(dw,getdate()) + 
 	  'der' + convert(char(10),getdate(),104)
+````
+.
+
 
 -- Meldungen mit raiserror
 -- mit raiserror koennen benutzerdefinierte Meldungen, Systemmeldungen
@@ -3744,8 +4003,11 @@ print 'Heute ist' + datename(dw,getdate()) +
 
 -- Systemmeldungen und benutzerdefinierte Meldungen werden in sys.messages
 -- gespeichert
-
+````sql
 select * from sys.messages where language_id = 1031;
+````
+.
+
 
 
 -- benutzerdefinierte Meldungen beginnen bei der messages_id > 50000
@@ -3757,52 +4019,76 @@ select * from sys.messages where language_id = 1031;
 -- 20 - 25 -- trennt den Client vom Server
 
 -- Meldung ertellen
-
+````sql
 exec sp_addmessage 600000, 10,'Cant deleted!','us_english', 'false';
 exec sp_addmessage 600000, 10,'Kann nicht geloescht werden!','german', 'false';
 
--- Meldung verwenden
+````
+.
 
+-- Meldung verwenden
+````sql
 raiserror(600000,10,1);				-- Meldung
 raiserror(600000,13,1);				-- Fehler 600000
-raiserror(600000,21,1) with log;	        -- schwerer Fehler
+raiserror(600000,21,1) with log;	-- schwerer Fehler
+````
+.
+
 
 -- sie koennen Raiseerrror mit jedem Schweregrad ins Ereignisprotokoll
 -- eintragen lassen;
-
+````sql
 raiserror(600000,13,1) with log;	-- Fehler 600000 im Ereignisprotokoll
 
--- AdHoc - Meldungen
+````
+.
 
+-- AdHoc - Meldungen
+````sql
 raiserror('Heute ist Donners### TAG.',10,1);
 
+````
+.
+````sql
 use standard 
 go
+````
+.
+
 
 -- Variable
 -- der Inhalt einer Variablen steht nur innerhalb der Stapel zur Verfuegung
 -- in dem die Variable deklariert wurde
 
 -- Deklaration
-
+````sql
 declare @ort varchar(50), @farbe varchar(10), @nummer char(3)
 declare @kuchen xml;
 declare @erg table(nummer char(3),
 				   namen varchar(50),
 				   lagermenge int);
 
+````
+.
+
 -- Wertzuweissung
 
 -- 1. Werte fuer skalare Variablen 
-
+````sql
 set @ort = 'Hamburg';
 set @farbe = 'rot';
 set @nummer = 'A03';
+````
+.
+
 
 -- 2. Werte durch Abfrage
-
+````sql
 select @ort = astadt, @farbe = farbe from artikel where anr = @nummer;
 
+````
+.
+````sql
 set @kuchen = '<rezept>			
 				<mehl>500</mehl>	
 				<eier>4</eier>
@@ -3811,30 +4097,49 @@ set @kuchen = '<rezept>
 
 insert into @erg select anr, aname, amenge from artikel where astadt = @ort;
 
--- Variableninhalt anzeigen lassen
+````
+.
 
+-- Variableninhalt anzeigen lassen
+````sql
 select @ort as [Ortsvariable], @farbe as [Farbe], @nummer as [Artikelname];
 
--- zu 2tens 
+````
+.
 
+-- zu 2tens 
+````sql
 print 'Der Artikel' + ' (' + @nummer + ') ist ' + @farbe + ' und lagert in ' + @ort;
 
--- xml
+````
+.
 
+-- xml
+````sql
 select @kuchen;
+````
+.
+
+
 
 -- Tabellenvariable
-
+````sql
 select * from @erg;
 go
+````
+.
 
+````sql
 use standard
 go
+````
+.
+
 
 -- Sprachkonstukte
 
 -- IF/ELSE
-
+````sql
 declare @tab sysname = 'zitrone'
 if not exists(select * from sys.tables where object_id = object_id(@tab))
 begin	
@@ -3842,36 +4147,55 @@ begin
 	return;
 end
 go
+````
+.
+
 
 ----
-
+````sql
 declare @datum datetime = '11.06.2022';
+````
+.
+
+````sql
 if @datum >= dateadd(dd, -7, getdate())
 begin
 	raiserror('Datum ist im Bereich.',10,1);
 end;
+````
+.
+````sql
 else
 begin
 	raiserror('Datum ist zu gross.',10,1);
 end;
 go
+````
+.
+
 
 -- neu im Angebot
-
+````sql
 drop table if exists zitrone;
 
--- Schleifen
+````
+.
 
+-- Schleifen
+````sql
 declare @x int = 1;
 while @x <=10
 begin
 	print cast(@x as varchar(10)) + '.Durchfall.';
 	set @x +=1;
 end;
+````
+.
+
 
 
 -- Try -- CATCH
-
+````sql
 begin try
 	begin 
 		select 1/0;
@@ -3885,9 +4209,12 @@ begin catch
 	end
 end catch
 go
+````
+.
+
 
 -- und
-
+````sql
 begin try
 	begin
 		begin transaction erdbeere
@@ -3905,19 +4232,28 @@ begin catch
 		end
 end catch;
 go
+````
+.
+
 
 ----
-
+````sql
 use standard
 go
+````
+.
+
 
 -- Dynamische SQL Anweissungen
-
+````sql
 declare @tab sysname, @nr char(3), @spalte1 sysname, @spalte2 sysname
 set @nr = 'A03';
 set @tab = 'artikel';
 set @spalte1 = 'aname';
 set @spalte2 = 'astadt';
+````
+.
+
 
 -- select @spalte1, @spalte2 from @tab where anr = @nr;
 
@@ -3936,8 +4272,7 @@ set @spalte2 = 'astadt';
 -- declare @sql varchar(max)
 -- set @sql = 'select' + @spalte1 + ', ' + @spalte2 + 'from' + @tab + 'where anr = ' + @nr;
 -- select @sql;
-
-
+````sql
 declare @tab sysname, @nr char(3), @spalte1 sysname, @spalte2 sysname
 set @nr = 'A03';
 set @tab = 'artikel';
@@ -3948,14 +4283,24 @@ set @sql = 'select ' + @spalte1 + ', ' + @spalte2 +
 		   ' from ' + @tab + ' where anr = ' + @hk + @nr + @hk;
 exec(@sql);
 go
+````
+.
+
+
 
 ----------------------------------------------------------------------------------
 
 ### TAG 16
-
+````sql
 use standard
 go
+````
+.
 
+````sql
+
+````
+.
 -- alter database standard modify file (name = standard,
 									 -- maxsize =20 GB);
 -- go
@@ -3963,22 +4308,34 @@ go
 -- alter database standard modify file (name = standard_log,
 									 -- maxsize =10 GB);
 -- go
-
+````sql
 if db_name() in('master','tembdb','msdb','model')
 begin
 	raiserror('Sie befinden sich in einer Systemdatenbank.',10,1);
 	return;
 end;
+````
+.
 
+````sql
 declare @realsize bigint = 0, @maxsize bigint = 0, @name varchar(2000);
 
+````
+.
+````sql
 declare filegroesse cursor for
 select name, size, max_size from sys.database_files;
 
+````
+.
+
 -- alles zusammmen auswaehlen
-
+````sql
 open filegroesse;
+````
+.
 
+````sql
 fetch from filegroesse into @name, @realsize, @maxsize;
 while @@fetch_status = 0
 begin
@@ -3997,6 +4354,9 @@ begin
 end;
 deallocate filegroesse;
 go
+````
+.
+
 
 -----
 Uebung 7
@@ -4009,17 +4369,23 @@ Spalten "Tabellenname" und "Anzahl Datensaetze" ausgibt
 */
 
 -- bevorzugtes Ergebnis
-
+````sql
 declare @ausgabe table(Tabellenname varchar(200), Anzahl_Datensätze int);
 declare @anz table (anzahl int);
 declare @tabelle sysname, @sql varchar(max);
+````
+.
 
+````sql
 declare tab_such cursor for 
 select b.name + '.' + a.name 
 from sys.tables as a join sys.schemas as b
 on a.schema_id = b.schema_id
 where a.name not like 'sys%';
+````
+.
 
+````sql
 open tab_such;
 fetch tab_such into @tabelle;
 
@@ -4034,9 +4400,12 @@ end;
 select * from @ausgabe;
 deallocate tab_such;
 go
+````
+.
+
 
 -- funktioniert aber Herr Lohse war nicht begeistert
-
+````sql
 SELECT o.name, i.rowcnt
 FROM sysindexes AS i
 INNER JOIN sysobjects AS o
@@ -4044,9 +4413,12 @@ ON  i.id = o.id
 WHERE i.indid < 2
 AND OBJECTPROPERTY(o.id, 'IsMSShipped') = 0
 ORDER BY o.name
+````
+.
+
 
 -- oder so, aber Herr Lohse ist immer noch nicht begeistert
-
+````sql
 SELECT o.name, ddps.row_count
 FROM sys.indexes AS i
 INNER JOIN sys.objects AS o
@@ -4057,12 +4429,18 @@ AND i.index_id = ddps.index_id
 WHERE i.index_id < 2
 AND o.is_ms_shipped = 0
 ORDER BY o.name
+````
+.
+
 
 ------
 
 Uebung 8:
-
+````sql
 declare @tabname sysname = 'artikel', @indname varchar(100) = 'anr_pk';
+
+````
+.
 
 /*
 Schreiben sie ein Skript welches für die oben angegebene Tabelle und den
@@ -4072,14 +4450,21 @@ Fragmentierungsgrad zwischen 8 und 30 % soll der Index reorganisiert
 werden, ist der Fragmentierungsgrad über 30 % soll der Index neu
 gebildet werden.
 */
-
+````sql
 use standard;
 go
+````
+.
 
+````sql
 declare @tabname sysname = 'artikel', @indname varchar(100) = 'anr_ps';
+
+````
+.
 
 -------
 
+````sql
 declare @tabvoll sysname, @indid int;
 
 select @tabvoll = a.name + '.' + b.name 
@@ -4121,13 +4506,19 @@ begin
 	raiserror('Index %s ist stark fragmentiert. er wurde neu gebildet',10, 1, @indname);
 end;
 go
+````
+.
+
 
 
 ### TAG 17:
 
-
+````sql
 use standard
 go
+````
+.
+
 
 -- Programieren von Scripten
 
@@ -4163,50 +4554,71 @@ go
 -- 1. select spalte, spalte from tabelle where spalte = @wert, GEHT IMMER
 -- 2. select @spvar, @spvar from @tabvar where @spvar = @wert; ES WIRD EINE DYNAMISCHE 
 --															   ABFRAGE BENOETIGT.
-
+````sql
 declare @sp1 sysname, @sp2 sysname, @tab sysname, @wert int = 0;
 declare @sql varchar(max);
 set @sp1 = 'aname';
 set @sp2 = 'amenge';
 set @tab = 'artikel';
 set @wert = 300;
+````
+.
+
 
 -- Wie es nicht geht
-
+````sql
 select @sp1 from @tab where @sp2 >= @wert;  -- SO GEHT ES NICHT!!
 
--- Wie es geht
+````
+.
 
+-- Wie es geht
+````sql
 execute('select ' + @sp1 + ' from ' + @tab + ' where ' + @sp2 + ' >= ' + @wert);
 
 						-- aufpassen auf Leerzeichen!!!!!!!
+````
+.
+
 
 -- ueberpruefen mit 
-
+````sql
 declare @sp1 sysname, @sp2 sysname, @tab sysname, @wert int = 0;
 declare @sql varchar(max);
 set @sp1 = 'aname';
 set @sp2 = 'amenge';
 set @tab = 'artikel';
 set @wert = 300;
+````
+.
 
-
+````sql
 set @sql = 'select ' + @sp1 + ' from ' + @tab + ' where ' + @sp2 + ' >= '
 					+ cast(@wert as varchar(200));
 select @sql;
+````
+.
+
+
 
 --oder
-
+````sql
 exec(@sql);
 go
+````
+.
+
 						
 --------
 
 -- gespeicherte Systemprozeduren
-
+````sql
 exec sp_help 'lieferant';
 exec sp_help;
 go
+````
+.
+
 
 -- Benutzerdefenierte gespeicherte Prozeduren
 
@@ -4230,12 +4642,15 @@ go
 -- 4. Verwendung als Sicherheitsmechanismus. Werden Informationen aus kritischen
 --    Umgebungen (Internet) direkt in die Datenbank gespeichert sollte dazu
 --    eine Prozedur zwischengeschaltet werden. Plausibilitaetspruefung
-
+````sql
 use standard
 go 
 
--- gespeicherte Prozeduren erstellen
+````
+.
 
+-- gespeicherte Prozeduren erstellen
+````sql
 create procedure mathe
 as
 declare @zahl1 float, @zahl2 float, @erg float;
@@ -4245,39 +4660,61 @@ set @zahl2 = 12.006;
 set @erg = @zahl1 / @zahl2;
 print 'Ergebnis:   ' + cast(@erg as varchar(100));
 go
+````
+.
+
 
 -- Prozedur starten
-
+````sql
 exec mathe;
 go
+````
+.
+
 
 -----------
 
 -- Parameteruebergabe an die Prozedur
-
+````sql
 create procedure mathe1 @zahl1 float, @zahl2 float
 as
 declare @erg float;
+````
+.
 
+````sql
 set @erg = @zahl1 / @zahl2;
 print 'Ergebnis:   ' + cast(@erg as varchar(100));
 go
+````
+.
 
+
+````sql
 exec mathe1 12.88,19.7;
 go
+````
+.
+
 
 -------------
 
 -- Parametervariablen der Prozedeur mit Default - Werten belegen
-
+````sql
 create procedure mathe2 @zahl1 float = 1, @zahl2 float = 1
 as
 declare @erg float;
+````
+.
 
+````sql
 set @erg = @zahl1 / @zahl2;
 print 'Ergebnis:   ' + cast(@erg as varchar(100));
 go
+````
+.
 
+````sql
 exec mathe2 12.88,19.7; 
 
 exec mathe2 12.88; 
@@ -4287,24 +4724,33 @@ exec mathe2;
 exec mathe2 default, 34.99;
 
 go
+````
+.
+
 
 -- die Prozedur soll das berechnete Ergebnis an das aufrufende Programm zuruekgeben
-
-
+````sql
 create procedure mathe3 @zahl1 float = 1, @zahl2 float = 1, @erg float output
 as
 set @erg = @zahl1 / @zahl2;
 go
+````
+.
+
+
 
 -- Aufruf
-
+````sql
 declare @ergebnis float
 exec mathe3 5.88, 2.66, @ergebnis output;
 print 'Ergebnis:   ' + cast(@ergebnis as varchar(100));
 go
+````
+.
+
 
 -- Fehlerhafte Parameterwerte verhindern
-
+````sql
 create procedure mathe4 @zahl1 float = 1, @zahl2 float = 1, @erg float output
 as
 if @zahl2 = 0
@@ -4313,19 +4759,28 @@ begin
 end;
 set @erg = @zahl1 / @zahl2;
 go
+````
+.
+
 
 ---
-
+````sql
 declare @ergebnis float
 exec mathe4 5.88, 0, @ergebnis output;
 print 'Ergebnis:   ' + cast(@ergebnis as varchar(100));
 go
+````
+.
 
+````sql
 exec mathe 4 13
 go
+````
+.
+
 
 -- Die Prozedur gibt einen Return - Wert zurueck
-
+````sql
 create procedure mathe5 @zahl1 float = 1, @zahl2 float = 1, @erg float output
 as
 if @zahl2 = 0
@@ -4334,9 +4789,12 @@ begin
 end;
 set @erg = @zahl1 / @zahl2;
 go
+````
+.
+
 
 ---
-
+````sql
 declare @ergebnis float, @rw int;
 exec @rw = mathe5 5.88, 0, @ergebnis output;
 if @rw = 8
@@ -4344,6 +4802,9 @@ raiserror('Du sollst nicht teilen durch NULL, du Horst!',10,1);
 else
 print 'Ergebnis:   ' + cast(@ergebnis as varchar(100));
 go
+````
+.
+
 
 /*
 wir schreiben eine Prozedur welcher eine Farbe eines Artikels uebergeben wird.
@@ -4353,26 +4814,35 @@ der Artikel mit der angegebenen Farbe anzeigen bzw zurueckgeben.
 */
 
 -- einfache Abfrage
-
+````sql
 select anr, aname, astadt
 from artikel 
 where farbe = 'rot';
 go
+````
+.
+
 
 -- Prozedur erstellen ( Ergebnis anzeigen)
-
+````sql
 create procedure farb_art @farbe varchar(10)
 as
 select anr, aname, astadt
 from artikel 
 where farbe = @farbe;
 go
+````
+.
 
+````sql
 exec farb_art 'rot';
 go
+````
+.
+
 
 -- das Ergebnis anzeigen und den Übergabe Paramter temporaer stellen
-
+````sql
 alter procedure farb_art @farbe varchar(10) = null
 as
 if @farbe is not null
@@ -4390,44 +4860,65 @@ begin
 	from artikel;	
 end;
 go
+````
+.
 
+````sql
 exec farb_art 'blau';
 exec farb_art;
+````
+.
+
 
 -- die Prozedur soll  das Ergebnis an das aufrufende Programm zurueckgeben
 -- 1. mit einer permanenten Tabelle
 
 -- Tabelle erstellen
-
+````sql
 create table art_ergebnis
 (Artikelnummer char(3),
 Artikelname varchar(300),
 Lagerort varchar(200));
+````
+.
+
 
 -- Tabelle füllen
-
+````sql
 insert into art_ergebnis exec farb_art 'rot';
 
--- Tabelle abrufen
+````
+.
 
+-- Tabelle abrufen
+````sql
 select * from art_ergebnis;
 go
+````
+.
+
 
 -- 2. mit einer Tabellenvariablen
-
+````sql
 declare @erg table (Artikelnummer char(3),
 				   Artikelname varchar(300),
 				   Lagerort varchar(200));
 insert into @erg exec farb_art 'rot';
 select * from @erg;
 go
+````
+.
+
 
 ------
 
 Uebung 9:
-
+````sql
 use standard;
 go
+````
+.
+
 
 /*
 Schreiben Sie eine Prozedur "obj_anz" der optional ein Datenbankobjektname- Bezeichener
@@ -4442,7 +4933,7 @@ Verwenden für die Anzeige eine Tabellenvariable.
 Die Angaben zu den Objekten finden Sie in der Systemsicht sys.objects und
 nähere Infos in der Spalte Type.
 */
-
+````sql
 create procedure obj_anz @bezeichner varchar(200) = null
 as
 if @bezeichner is not null 
@@ -4452,7 +4943,10 @@ if @bezeichner is not null
   return;
   end
 declare @ausgabe table(Objekttyp nvarchar(50), Anzahl int); 
+````
+.
 
+````sql
 if @bezeichner is null
   begin
 	select case when type = 'u' then 'Tabellen'
@@ -4464,7 +4958,10 @@ if @bezeichner is null
 	and name not like 'sp_%' and name not like 'fn_%'
 	group by type;
   end;
+````
+.
 
+````sql
 if @bezeichner is not null
 begin
 if @bezeichner = 'sicht'
@@ -4473,6 +4970,10 @@ if @bezeichner = 'sicht'
 					(select count(*) from sys.objects where type = 'v'));
 	select * from @ausgabe;
   end;
+````
+.
+
+````sql
 if @bezeichner = 'tabelle'
   begin
 	insert into @ausgabe values('Tabellen',
@@ -4480,6 +4981,10 @@ if @bezeichner = 'tabelle'
 									  and name not like 'sys_%'));
 	select * from @ausgabe;
   end;
+````
+.
+
+````sql
 if @bezeichner = 'prozedur'
   begin
 	insert into @ausgabe values('Prozeduren',
@@ -4487,14 +4992,23 @@ if @bezeichner = 'prozedur'
 									  and name not like 'sp_%'));
 	select * from @ausgabe;
   end;
+````
+.
 
+````sql
 end;
 go
+````
+.
+
 
 --------
-
+````sql
 exec obj_anz;
 exec obj_anz 'Sicht';
+````
+.
+
 
 
 --------------------------------------------
@@ -4502,9 +5016,12 @@ exec obj_anz 'Sicht';
 ### TAG 18:
 
 Uebung 10:
-
+````sql
 use standard
 go
+````
+.
+
 
 /*
 
@@ -4542,9 +5059,12 @@ Ich wünsche Ihnen viel Erfolg.
 */
 
 -- Prozedur Index Defragmentieren.sql
-
+````sql
 use standard;
 go
+````
+.
+````sql
 create procedure ind_defr @tab nvarchar(200), @ind varchar(200) = null
 as
 declare @obj_id int, @ind_id int, @ind_name nvarchar(200)
@@ -4583,6 +5103,10 @@ if @ind is null
 	end
 		deallocate tab_ind
 end
+````
+.
+
+````sql
 if @ind is not null
 	begin
 		if not exists (select * from sys.indexes where name = @ind)
@@ -4613,54 +5137,88 @@ if @ind is not null
 		end	
 	end
 go
+````
+.
+
 
 
 -- pruefen mit
-
+````sql
 exec ind_defr;
 
 exec ind_defr Artikel;
 
 exec ind_defr Artikel, anr_ps;
 
--- Prozedur loeschen
+````
+.
 
+-- Prozedur loeschen
+````sql
 drop procedure [ind_defr];  
 go  
+````
+.
+
 
 ---------------------------------------------------------------------------------
 
 ### TAG 19:
-
+````sql
 use standard
 go
+````
+.
+
 
 -- Datenbankschemas erstellen
-
+````sql
 create schema lager;
 go
 create schema verkauf;
 go
+````
+.
+
 
 -- Datenbank Tabellen den jeweiligen Schemas zuordnen
-
+````sql
 alter schema lager transfer dbo.artikel;
 go
+````
+.
+
+````sql
 alter schema verkauf transfer dbo.lieferant;
 go
+````
+.
+
+````sql
 alter schema verkauf transfer dbo.lieferung;
 go
+````
+.
+
+
+
 
 -- Was ist passiert?
-
+````sql
 select * from artikel;			-- dieser Zugriff geht nicht mehr
 select * from lager.artikel;	-- funktioniert
 
+````
+.
+
 -- wenn diese Anweisung geht, dann wurden die Fremdschluessel im
 -- Hintergrund richtig umgeschrieben
-
+````sql
 insert into verkauf.lieferung values('L04','A03',500,getdate());
 go
+````
+.
+
 
 ------
 
@@ -4690,19 +5248,34 @@ go
 --	   dieser Modus kann grafisch oder mit der Prozedur sp_configure festgelegt werden
 --     Achtung, danach muss da DBMS gestartet werden
 
-
+````sql
 use master;
 go
+````
+.
+
 
 
 -- Windows Authentifizierung
-
+````sql
 create login [sql16\verwaltung] from windows;
 go
+````
+.
+````sql
 create login [sql16\material] from windows;
 go
+````
+.
+````sql
 create login [sql16\diana] from windows;
 go
+````
+.
+
+
+
+
 
 -- der Benutzer Horst darf sich nie mit dem SQL Server verbinden
 -- Horst ist Mitglied der Windowsgruppe 'verwaltung' und diese Gruppe
@@ -4711,21 +5284,34 @@ go
 -- Problemloesung
 
 -- Horst Login erstellen
-
+````sql
 create login [sql16\horst] from windows;
 go
+````
+.
+
 
 -- und Zugriff verweigern
-
+````sql
 deny connect sql to [sql16\horst];
 go
+````
+.
+
 
 -- SQL Server Logins
-
+````sql
 create login [Frank] with Password = 'Pa$$w0rd';
 go
+````
+.
+
+````sql
 create login [Dieter] with Password = 'Pa$$w0rd';
 go
+````
+.
+
 
 -- Erstellen von Serverrollen, zuweisen von Serverberechtigungen
 -- arbeit mit festen Serverrollen
@@ -4735,26 +5321,38 @@ go
 alter server role sysadmin add member [sql16\diana];
 
 -- erstellen einer benutzerdefinierten Serverrolle
-
+````sql
 create server role useredit;
 go
 
+````
+.
+
 
 -- Mitglieder der Rolle sollen logins bearbeiten koennen
-
+````sql
 grant alter any login to useredit;
 go
+````
+.
+
 
 -- der Rolle sollen die Benutzer der Windowsrolle Verwaltung zugewiesen werden
-
+````sql
 alter server role useredit add member [sql16\Verwaltung];
 go
+````
+.
+
 
 -- weitere Berechtigung fuer die Serverrolle useredit
 
-
+````sql
 grant alter any credential to [useredit]
 go
+````
+.
+
 
 ----------
 
