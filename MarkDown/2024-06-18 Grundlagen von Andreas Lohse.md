@@ -1,14 +1,34 @@
 --------------------------------------------------------------------------
+	
+	
+	Thanks On Andreas Lohse!
 
--- Vorbereitung Datenbank Standard erstellen
+	Diese Unterlagen sind von seinem GitHub Profil
+	zur Vollständigkeitshalber wurde das Script
+	mit Obsidian optisch angepasst
+
+[GitHub Link](https://github.com/2vasy/SQL/tree/master)
+
+
+--------------------------------------------------------------------------
+
+#tag
+#lohse
+#zusammenfassung
+#sql
+#administration
+
+--------------------------------------------------------------------------
+
+#### - Vorbereitung Datenbank Standard erstellen
 ````sql
 	use master
 	go
 ````
 
 
--- eventuell vorhandene Datenbankspezifische benutzerdefinierte
--- Fehlermeldungen entfernen
+--- eventuell vorhandene Datenbankspezifische benutzerdefinierte
+--- Fehlermeldungen entfernen
 ````sql
 	if exists(select * from sys.messages where message_id = 50100)
 		execute sp_dropmessage '50100', 'all';
@@ -16,7 +36,7 @@ go
 ````
 
 
--- eventuell vorhandene Datenbank "Standard" loeschen
+--- eventuell vorhandene Datenbank "Standard" loeschen
 ````sql 	
 	if exists(select * from sys.databases where database_id = db_id('Standard'))
 	drop database Standard;
@@ -25,7 +45,7 @@ go
 
 
 
--- benutzerdefinierte Fehlermeldung erstellen
+--- benutzerdefinierte Fehlermeldung erstellen
 ````sql
 		sp_addmessage 50100,16,'The delivery of supplier %s of %s, was deleted from the User %s on %s.', 'us_english', 'true';
 go
@@ -36,7 +56,7 @@ go
 		sp_addmessage 50100,16,'Die Lieferung von Lieferant %1! vom %2!, wurde von User %3! am %4! geloescht', 'German', 'true';
 go
 ````
--- neue Datenbank "Standard" erstellen
+#### --- neue Datenbank "Standard" erstellen
 ```sql
 create database standard;
 /*
@@ -57,16 +77,19 @@ go
 
 
 
--- Schemas erstellen
- 
--- create schema verwaltung authorization dbo;
-go
--- create schema einkauf authorization dbo;
-go
- 
+--- Schemas erstellen
+````sql
+create schema verwaltung authorization dbo;
+````
+.
+````sql
+create schema einkauf authorization dbo;
+````
+.
 
 
--- Tabellen erstellen
+
+--- Tabellen erstellen
 ````sql
 	create table dbo.artikel
 		(
@@ -115,20 +138,20 @@ go
 
 
 
--- Tabellen mit Anfangsdaten f�llen
--- Tabelle Lieferant
+--- Tabellen mit Anfangsdaten f�llen
+--- Tabelle Lieferant
 
 ````sql
 	insert into dbo.lieferant values('L01', 'Schmidt', 20, 'Hamburg');
 	insert into dbo.lieferant values('L02', 'Jonas', 10, 'Ludwigshafen');
-insert into dbo.lieferant values('L03', 'Blank', 30, 'Ludwigshafen');
-insert into dbo.lieferant values('L04', 'Clark', 20, 'Hamburg');
-insert into dbo.lieferant values('L05', 'Adam', 30, 'Aachen');
+	insert into dbo.lieferant values('L03', 'Blank', 30, 'Ludwigshafen');
+	insert into dbo.lieferant values('L04', 'Clark', 20, 'Hamburg');
+	insert into dbo.lieferant values('L05', 'Adam', 30, 'Aachen');
 ````
 
 
 
--- Tabelle Artikel
+--- Tabelle Artikel
 ````sql
 	insert into dbo.artikel values('A01', 'Mutter', 'rot', 12, 'Hamburg', 800);
 	insert into dbo.artikel values('A02', 'Bolzen', 'gr�n', 17, 'Ludwigshafen', 1200);
@@ -140,88 +163,99 @@ insert into dbo.artikel values('A06', 'Zahnrad', 'rot', 19, 'Hamburg', 500);
 ````
 
 
--- Tabelle Lieferung
+--- Tabelle Lieferung
 ````sql
 	insert into dbo.lieferung values('L01', 'A01', 300, '18.05.90');
 	insert into dbo.lieferung values('L01', 'A02', 200, '13.07.90');
-insert into dbo.lieferung values('L01', 'A03', 400, '01.01.90');
-insert into dbo.lieferung values('L01', 'A04', 200, '25.07.90');
-insert into dbo.lieferung values('L01', 'A05', 100, '01.08.90');
-insert into dbo.lieferung values('L01', 'A06', 100, '23.07.90');
-insert into dbo.lieferung values('L02', 'A01', 300, '02.08.90');
-insert into dbo.lieferung values('L02', 'A02', 400, '05.08.90');
-insert into dbo.lieferung values('L03', 'A02', 200, '06.08.90');
-insert into dbo.lieferung values('L04', 'A02', 200, '09.08.90');
-insert into dbo.lieferung values('L04', 'A04', 300, '20.08.90');
-insert into dbo.lieferung values('L04', 'A05', 400, '21.08.90');
+	insert into dbo.lieferung values('L01', 'A03', 400, '01.01.90');
+	insert into dbo.lieferung values('L01', 'A04', 200, '25.07.90');
+	insert into dbo.lieferung values('L01', 'A05', 100, '01.08.90');
+	insert into dbo.lieferung values('L01', 'A06', 100, '23.07.90');
+	insert into dbo.lieferung values('L02', 'A01', 300, '02.08.90');
+	insert into dbo.lieferung values('L02', 'A02', 400, '05.08.90');
+	insert into dbo.lieferung values('L03', 'A02', 200, '06.08.90');
+	insert into dbo.lieferung values('L04', 'A02', 200, '09.08.90');
+	insert into dbo.lieferung values('L04', 'A04', 300, '20.08.90');
+	insert into dbo.lieferung values('L04', 'A05', 400, '21.08.90');
 go
 ````
 
 
 
--- Sicherstellen von Geschaeftsregeln
--- Addieren der Liefermenge zur entsprechenden Lagermenge bei neuer Lieferung
-
--- create trigger menge_lief_neu
--- on einkauf.lieferung
--- for insert
--- as
--- if (select inserted.lmenge from inserted ) > 0
---	begin
---	 update verwaltung.artikel
---	 set amenge = amenge + inserted.lmenge
---	 from verwaltung.artikel join inserted on artikel.anr = inserted.anr;
---	end;
+--- Sicherstellen von Geschaeftsregeln
+--- Addieren der Liefermenge zur entsprechenden Lagermenge bei neuer Lieferung
+````sql
+create trigger menge_lief_neu
+on einkauf.lieferung
+for insert
+as
+if (select inserted.lmenge from inserted ) > 0
+	begin
+	 update verwaltung.artikel
+	 set amenge = amenge + inserted.lmenge
+	 from verwaltung.artikel join inserted on artikel.anr = inserted.anr;
+	end;
 go
+````
+.
 
--- Subtrahieren der Liefermenge vom der entsprechenden Lagermenge
--- beim Loeschen einer oder mehrerer Lieferungen
 
--- create trigger lief_l�sch
--- on einkauf.lieferung
--- for delete
--- as
--- update verwaltung.artikel
--- set amenge = amenge - deleted.lmenge
--- from verwaltung.artikel join deleted on artikel.anr = deleted.anr;
+--- Subtrahieren der Liefermenge vom der entsprechenden Lagermenge
+--- beim Loeschen einer oder mehrerer Lieferungen
+````sql
+	create trigger lief_l�sch
+	on einkauf.lieferung
+	for delete
+	as
+	update verwaltung.artikel
+	set amenge = amenge - deleted.lmenge
+	from verwaltung.artikel join deleted on artikel.anr = deleted.anr;
 go
+````
+.
 
 
--- aendern der Lagermenge des entsprechenden Artikels bei aenderung
--- der Liefermenge einer vorhandenen Lieferung
 
--- create trigger menge_lief_aendern
--- on einkauf.lieferung
--- for update
--- as
--- if update(lmenge)
---   begin
---	update verwaltung.artikel
---	set amenge = amenge + inserted.lmenge - deleted.lmenge
---	from verwaltung.artikel join inserted on artikel.anr = inserted.anr
---	join deleted on artikel.anr = deleted.anr;
---    end;
+--- aendern der Lagermenge des entsprechenden Artikels bei aenderung
+--- der Liefermenge einer vorhandenen Lieferung
+````sql
+ create trigger menge_lief_aendern
+ on einkauf.lieferung
+ for update
+ as
+ if update(lmenge)
+   begin
+	update verwaltung.artikel
+	set amenge = amenge + inserted.lmenge - deleted.lmenge
+	from verwaltung.artikel join inserted on artikel.anr = inserted.anr
+	join deleted on artikel.anr = deleted.anr;
+    end;
 go
+````
+.
 
 
--- aendern der Lagermenge wenn die Artikelnummer einer
--- Lieferung geaendert wird
 
--- create trigger anummer_lief_aendern
--- on einkauf.lieferung
--- for update
--- as
--- if update(anr)
---   begin
---	update verwaltung.artikel
---	set amenge = amenge - deleted.lmenge
---	from verwaltung.artikel join deleted on artikel.anr = deleted.anr
-
---	update verwaltung.artikel
---	set amenge = amenge + inserted.lmenge
---	from verwaltung.artikel join inserted on artikel.anr = inserted.anr;
---    end;
+--- aendern der Lagermenge wenn die Artikelnummer einer
+--- Lieferung geaendert wird
+````sql
+ create trigger anummer_lief_aendern
+ on einkauf.lieferung
+ for update
+ as
+ if update(anr)
+   begin
+	update verwaltung.artikel
+	set amenge = amenge - deleted.lmenge
+	from verwaltung.artikel join deleted on artikel.anr = deleted.anr
+	update verwaltung.artikel
+	set amenge = amenge + inserted.lmenge
+	from verwaltung.artikel join inserted on artikel.anr = inserted.anr;
+    end;
 go
+````
+.
+
 
 
 ---------------------------------------------------------------------
@@ -230,32 +264,32 @@ go
 use standard;
 go
 
--- Select ohne Datenquellen
+--- Select ohne Datenquellen
 ````sql
-	select getdate()                            -- aktuelles Datum
+	select getdate()                            --- aktuelles Datum
 	select 5 * 20;
 ````
 
 
 
 
--- Select mit Datenquellen
+--- Select mit Datenquellen
 
--- alle Angaben zu allen Lieferanten
+--- alle Angaben zu allen Lieferanten
 ````sql
 	select *from lieferant;
 	````
 
 
--- Der Stern sollte nur fuer Testabfragen verwendet werden
--- Programmierer verwenden die Spaltennamen.
+--- Der Stern sollte nur fuer Testabfragen verwendet werden
+--- Programmierer verwenden die Spaltennamen.
 ````sql
 	select lnr, lname, status, lstadt
 	from lieferant;
 ````
 
 
--- vollqualifierter Name
+--- vollqualifierter Name
 
 ````sql
 	select lnr, lname, status, lstadt
@@ -263,9 +297,9 @@ go
 ````
 
 
--- Aus der DB Standard heraus soll die Tabelle Person in Person der DB
--- AdventureWorks2012 abgefragt werden. Dabei soll Datenbankkontex des
--- aufrufenden Stapels nicht geaendert (use...) werden.
+--- Aus der DB Standard heraus soll die Tabelle Person in Person der DB
+--- AdventureWorks2012 abgefragt werden. Dabei soll Datenbankkontex des
+--- aufrufenden Stapels nicht geaendert (use...) werden.
 
 ````sql
 	select *
@@ -274,27 +308,27 @@ go
 
 
 
--- ausgewaehlte Spaltenwerte
--- Wohnorte und Namen aller Lieferanten
+--- ausgewaehlte Spaltenwerte
+--- Wohnorte und Namen aller Lieferanten
 ````sql
 	select lstadt, lname
 	from lieferant
 ````
 
 
--- ausgewaehlte Datensaetze
--- dafuer wird die Where - Klausel benoetigt
+--- ausgewaehlte Datensaetze
+--- dafür wird die Where - Klausel benoetigt
 
--- Vergleichsoperatoren
+--- Vergleichsoperatoren
 
--- Nummern, Namen und Farbe der Artikel die in Hamburg lagern
+--- Nummern, Namen und Farbe der Artikel die in Hamburg lagern
 ````sql
 	select anr, aname, farbe from artikel
 	where astadt = 'Hamburg';
 ````
 
 
--- Alle Lieferungen nach dem 01.08.90
+--- Alle Lieferungen nach dem 01.08.90
 ````sql
 	select * from lieferung
 	where ldatum > '01.08.1990';
@@ -306,19 +340,19 @@ go
 ````
 
 
--- Alle Lieferungen mit einer Liefermenge von 200 Stueck
+--- Alle Lieferungen mit einer Liefermenge von 200 Stueck
 ````sql
 	select * from lieferung
 	where lmenge = 200;
 ````
 
 
--- Bereiche angeben
+#### --- Bereiche angeben
 
--- mit between koennen Bereiche definiert werden, Die angegebene Grenzen
--- (von-bis) sind einschliesslich
+--- mit between koennen Bereiche definiert werden, Die angegebene Grenzen
+--- (von-bis) sind einschliesslich
 
--- Alle Lieferungen zwischen dem 20.07.90 und dem 18.08.90
+--- Alle Lieferungen zwischen dem 20.07.90 und dem 18.08.90
 ````sql
 	select *
 	from lieferung
@@ -333,41 +367,41 @@ where ldatum between '20.07.90' and '18.08.90';
 ````
 
 
--- Alle Liefrungen die nicht zwischen dem 20.07.90 und dem 18.08.90
--- geliefert wurden
+--- Alle Liefrungen die nicht zwischen dem 20.07.90 und dem 18.08.90
+--- geliefert wurden
 ````sql
 	select *
 	from lieferung
-where ldatum not between '20.07.90' and '18.08.90';
+	where ldatum not between '20.07.90' and '18.08.90';
 ````
 
 
--- between wird hauptsaechlich auf numerische- und Datumsdatentypen
--- angewendet.
+--- between wird hauptsaechlich auf numerische- und Datumsdatentypen
+--- angewendet.
 
--- Alle Lieferanten deren Namen mit dem Buchstaben B bis J beginnen
+--- Alle Lieferanten deren Namen mit dem Buchstaben B bis J beginnen
 ````sql
 	select * from lieferant
 	where lname between 'B' and 'J';
 ````
 
 
--- Jonas wird nicht angezeigt. Warum?
+--- Jonas wird nicht angezeigt. Warum?
 ````sql
 	select * from lieferant
 	where lname between 'B' and 'Jz';
 ````
 
 
--- Dafuer verwendet man like
+--- Dafuer verwendet man like
 
 ------
--- Listen
+--- Listen
 
--- Alle Lieferanten die in Hamburg oder in Aachen wohnen
+--- Alle Lieferanten die in Hamburg oder in Aachen wohnen
 ````sql
 	select * from lieferant
-	where lstadt = 'Hamburg', 'Aachen'              -- geht nicht
+	where lstadt = 'Hamburg', 'Aachen'              --- geht nicht
 ````
 .
 
@@ -382,7 +416,7 @@ where ldatum not between '20.07.90' and '18.08.90';
 ````
 
 
--- Alle Lieferanten die nicht in Hamburg oder in Aachen wohnen
+--- Alle Lieferanten die nicht in Hamburg oder in Aachen wohnen
 ````sql
 	select * from lieferant
 	where lstadt not in('Hamburg', 'Aachen');
@@ -391,34 +425,34 @@ where ldatum not between '20.07.90' and '18.08.90';
 
 ------
 
--- neuen Lieferanten aufnehmen.
+--- neuen Lieferanten aufnehmen.
 ````sql
 	insert into lieferant values('L10','Schul%ze',null, null);
 	select * from lieferant;
 ````
 
 
--- LIKE Operator
+#### --- LIKE Operator
 
--- kann nur auf alfanummerische Zeichen angewendet werden.
--- verwendet PLatzhalter (Jokerzeichen)
+--- kann nur auf alfanummerische Zeichen angewendet werden.
+--- verwendet PLatzhalter (Jokerzeichen)
 
--- Alle Lieferanten die an einem Ort wohnen der mit dem Buchstaben L beginnt.
+--- Alle Lieferanten die an einem Ort wohnen der mit dem Buchstaben L beginnt.
 ````sql
 	select * from lieferant
 	where lstadt like 'L%';
 ````
 
 
--- Alle Lieferanten deren Namen an zweiter Stelle den Buchstaben L haben.
+--- Alle Lieferanten deren Namen an zweiter Stelle den Buchstaben L haben.
 ````sql
 	select * from lieferant
 	where lname like '_L%';
 ````
 
 
--- Alle Lieferanten deren Namen an zweiter Stelle den Buchstaben L haben und
--- an vorletzter Stelle den Buchstaben R.
+--- Alle Lieferanten deren Namen an zweiter Stelle den Buchstaben L haben und
+--- an vorletzter Stelle den Buchstaben R.
 ````sql
 	select * from lieferant
 	where lname like '_L%R_';
@@ -428,7 +462,7 @@ insert into lieferant values('L12','Kulesch',null, null);
 ````
 
 
--- Lieferanten deren Namen mit dem Buchstaben B bis J beginnen
+--- Lieferanten deren Namen mit dem Buchstaben B bis J beginnen
 ````sql
 	select * from lieferant
 	where lname like '[B-J]%';
@@ -448,21 +482,21 @@ insert into lieferant values('L12','Kulesch',null, null);
 ````
 
 
--- besser
+--- besser
 ````sql
 	select * from lieferant
 	where lname not like '%a%';
 ````
 
 
--- Gesucht sind die Lieferanten in deren Namen ein % - Zeichen steht
+--- Gesucht sind die Lieferanten in deren Namen ein % - Zeichen steht
 ````sql
 	select * from lieferant
-	where lname like '%%%';                 --- ???????????
+	where lname like '%%%';                 ---- ???????????
 ````
 
 
--- Da % ein Platzhalter ist, muss man mit einer Maske arbeiten.
+--- Da % ein Platzhalter ist, muss man mit einer Maske arbeiten.
 ````sql
 	select * from lieferant
 	where lname like '%y%%' escape 'y';
@@ -471,12 +505,12 @@ insert into lieferant values('L12','Kulesch',null, null);
 
 ------
 
--- Alle Lieferanten deren Wohnort nicht bekannt ist
+--- Alle Lieferanten deren Wohnort nicht bekannt ist
 ````sql
 	select * from lieferant
-	where lstadt = null;                    -- kein Fehler, sondern eine leere Menge
-                                        -- jeder Vergleich mit Unbekannt ergibt
-                                        -- Unbekannt
+	where lstadt = null;                    --- kein Fehler, sondern eine leere Menge
+                                        --- jeder Vergleich mit Unbekannt ergibt
+                                        --- Unbekannt
 
 insert into lieferant values('L13','Schoeppach','99','Erfurt');
 ````
@@ -487,8 +521,8 @@ insert into lieferant values('L13','Schoeppach','99','Erfurt');
 	````
 
 
--- Alle Lieferanten ohne Statuswert sollen mit einem Angenommenen Status von 50 
--- angezeigt werden
+--- Alle Lieferanten ohne Statuswert sollen mit einem Angenommenen Status von 50 
+--- angezeigt werden
 ````sql
 	select lnr, lname, isnull(status,50) as [status], lstadt
 	from lieferant;
@@ -497,7 +531,7 @@ insert into lieferant values('L13','Schoeppach','99','Erfurt');
 
 ------
 
--- Arbeit mit mehreren Bedingungen in der WHERE - Klausel
+--- Arbeit mit mehreren Bedingungen in der WHERE - Klausel
 ````sql
 	select * from artikel
 	where gewicht > 15 and astadt like '[E-L]%'or amenge > 700;
@@ -510,51 +544,53 @@ insert into lieferant values('L13','Schoeppach','99','Erfurt');
 
 ````
 
-Uebung 1:
+#### Uebung 1:
 
 1.
 
--- schreiben die 3 Abfragen 
--- (Vergleichsoperatoren und Schluesselwoerter "between" und "in")
--- die alle Lieferungen vom 5. bzw 6. August 1990 ausgeben
+--- schreiben die 3 Abfragen 
+--- (Vergleichsoperatoren und Schluesselwoerter "between" und "in")
+--- die alle Lieferungen vom 5. bzw 6. August 1990 ausgeben
 ````sql
 	select *
 	from lieferung
-where ldatum between '05.08.1990' and '06.08.1990'
+	where ldatum between '05.08.1990' and '06.08.1990'
 ````
 .
 
 ````sql
 	select * 
 	from lieferung
-where ldatum in ('05.08.1990', '06.08.1990')
+	where ldatum in ('05.08.1990', '06.08.1990')
 ````
 .
 
 ````sql
 	select * 
 	from lieferung
-where ldatum >= '05.08.1990' and ldatum <= '06.08.1990';
+	where ldatum >= '05.08.1990' and ldatum <= '06.08.1990';
 ````
 
 
 2.
 
--- schreiben sie eine Abfrage, die die Nummern und Namen aller roten
--- oder blauen Artikel aus Hamburg ausgibt sowie die Artikel die eine 
--- Lagermenge zwischen 900 und 1500 Stueck haben und in deren 
--- Name ein "a" vorkommt
+--- schreiben sie eine Abfrage, die die Nummern und Namen aller roten
+--- oder
+ blauen Artikel aus Hamburg ausgibt sowie die Artikel die eine 
+--- Lagermenge zwischen 900 und 1500 Stueck haben und in deren 
+--- Name ein "a" vorkommt
 ````sql
 	select  anr, aname from artikel
-	where Farbe in('rot','blau') and astadt ='Hamburg' or 
-amenge between 900 and 1500 and aname like '%a%';
+	where Farbe in('rot','blau') and astadt ='Hamburg' or amenge
+		between 900 and 1500 and aname
+		like '%a%';
 ````
 
 
 3.
 
--- schreiben sie eine Abfrage, die alle Lieferanten ausgibt, deren 
--- Namen mit einem Buchstaben zwischen A und G beginnt
+--- schreiben sie eine Abfrage, die alle Lieferanten ausgibt, deren 
+--- Namen mit einem Buchstaben zwischen A und G beginnt
 ````sql
 	select * from lieferant
 	where lname between 'A' and 'G';
@@ -569,10 +605,10 @@ amenge between 900 and 1500 and aname like '%a%';
 
 4.
 
--- schreiben sie eine Abfrage, die alle Lieferanten ausgibt, deren Namen
--- mit "S", "C" oder "B" beginnen und wo der dritte Buchstabe im Namen
--- ein "a" ist, die aber in einem Ort wohnen in dessen
--- Namen die Zeichenfolge "ried" nicht vorkommt
+--- schreiben sie eine Abfrage, die alle Lieferanten ausgibt, deren Namen
+--- mit "S", "C" oder "B" beginnen und wo der dritte Buchstabe im Namen
+--- ein "a" ist, die aber in einem Ort wohnen in dessen
+--- Namen die Zeichenfolge "ried" nicht vorkommt
 ````sql
 	select * from lieferant
 	where lname like '[BCS]_a%_' and lstadt not like 'ried%';
@@ -588,9 +624,9 @@ amenge between 900 and 1500 and aname like '%a%';
 
 5.
 
--- schreiben sie eine Abfrage zur Ausgabe aller Artikel
--- es sollen jedoch nur die Artikel ausgegeben werden, deren Gewicht 
--- null Gramm betraegt oder unbekannt ist
+--- schreiben sie eine Abfrage zur Ausgabe aller Artikel
+--- es sollen jedoch nur die Artikel ausgegeben werden, deren Gewicht 
+--- null Gramm betraegt oder unbekannt ist
 ````sql
 	select * from artikel
 	where gewicht = 0 or gewicht is null;
@@ -619,19 +655,25 @@ amenge between 900 and 1500 and aname like '%a%';
 --------------------------------------------------------------------------------
 
 ### TAG 2:
-
+````sql
 use standard
 go
+````
+.
 
+````sql
 select anr, aname, gewicht, astadt, amenge
 from artikel
 where anr in('A01','A02','A03')
 
--- Ergebnisse formatieren
+````
+.
 
--- 1. Literale (erlaeuternder Text)
+#### --- Ergebnisse formatieren
 
--- beschreibt den Inhalt einer Spalte
+--- 1. Literale (erlaeuternder Text)
+
+--- beschreibt den Inhalt einer Spalte
 ```sql
 select anr, aname, gewicht 'Gramm', astadt, amenge 'Stueck'
 from artikel
@@ -653,7 +695,9 @@ where anr in('A01','A02','A03')
 
 
 
---oder
+--- oder
+
+
 ```sql
 select anr  [Artikelnummer], aname [Artikelname], 
 gewicht [Gewicht], 'Gramm' [Gewichtseinheit], 
@@ -665,7 +709,8 @@ where anr in('A01','A02','A03')
 
 
 
---oder
+--- oder
+
 ```sql
 select   [Artikelnummer] = anr, [Artikelname] = aname,  
   [Gewicht] = gewicht,  [Gewichtseinheit] = 'Gramm', 
@@ -677,9 +722,9 @@ where anr in('A01','A02','A03')
 
 
 
--- Sortieren der Ergebnismenge
--- das Ergebnis soll nach dem Artikelnamen aufsteigend sortiert werden
--- und bei gleichen Artikelnamen nach dem Lagerort absteigend sortiert werden
+--- Sortieren der Ergebnismenge
+--- das Ergebnis soll nach dem Artikelnamen aufsteigend sortiert werden
+--- und bei gleichen Artikelnamen nach dem Lagerort absteigend sortiert werden
 ```sql
 select anr as [Artikelnummer], aname as [Artikelname], 
 gewicht as [Gewicht], 'Gramm' as [Gewichtseinheit], 
@@ -691,7 +736,8 @@ order by aname asc, astadt desc;
 
 
 
--- oder
+--- oder
+
 ```sql
 
 select anr as [Artikelnummer], aname as [Artikelname], 
@@ -703,7 +749,8 @@ order by [Artikelnummer] asc, [Lagerort] desc;
 .
 
 
--- oder
+--- oder
+
 ```sql
 select anr as [Artikelnummer], aname as [Artikelname], 
 gewicht as [Gewicht], 'Gramm' as [Gewichtseinheit], 
@@ -714,17 +761,17 @@ order by 2 asc, 5 desc;
 .
 
 
+#### --- DISTINCT
+--- Entfernen doppelter Datensaetze aus dem Ergebnis
 
--- Entfernen doppelter Datensaetze aus dem Ergebnis
+--- Schluesselwort DISTINCT entfernt doppelte DS aus dem Ergebnis
+--- Distinct wird eingesetzt
+---                  1. in der Select Liste
+---                  2. in Argument einer Aggregatfunktion
 
--- Schluesselwort DISTINCT entfernt doppelte DS aus dem Ergebnis
--- Distinct wird eingesetzt
---                  1. in der Select Liste
---                  2. in Argument einer Aggregatfunktion
-
--- Welche Lieferungen (lnr) haben geliefert?
+--- Welche Lieferungen (lnr) haben geliefert?
 ```sql
-select lnr from lieferung       -- 12 DS mit redundanten Informationen
+select lnr from lieferung       --- 12 DS mit redundanten Informationen
 ```
 .
 
@@ -737,16 +784,16 @@ select distinct lnr from lieferung;     --4DS
 
 ```sql
 
-select distinct lnr from lieferant;     -- Sinnlos, unverschaemt blamabel
+select distinct lnr from lieferant;     --- Sinnlos, unverschaemt blamabel
 ```
 .
 
 
--- CASE Ausdruecke
+#### --- CASE Ausdruecke
 
--- Einfaches CASE
--- es wird ein Ausdruck mit mehreren anderen Ausdruecken verglichen um das
--- Resultset zu finden
+--- Einfaches CASE
+--- es wird ein Ausdruck mit mehreren anderen Ausdruecken verglichen um das
+--- Resultset zu finden
 ```sql
 select lnr, lname, lstadt, case lstadt
                            when 'Hamburg' then 'wohnt im Norden'
@@ -762,9 +809,9 @@ delete lieferant where lnr > 'L05';
 
 
 
--- komplexes CASE
--- hierbei werden wie bei einer WHERE - Klausel Bollsche Ausdruecke 
--- Ueberprueft und bei Uebereinstimmungen ein Resultset zurueckgegeben
+--- komplexes CASE
+--- hierbei werden wie bei einer WHERE - Klausel Bollsche Ausdruecke 
+--- Ueberprueft und bei Uebereinstimmungen ein Resultset zurueckgegeben
 ```sql
 select anr, aname, amenge, farbe, 
        case
@@ -778,18 +825,18 @@ from artikel;
 
 
 
--- Berechnen von Ergebnismengen und arbeiten mit Funktionen
+#### --- Arithmetische Operatoren
+--- Berechnen von Ergebnismengen und arbeiten mit Funktionen
 
--- Arithmetische Operatoren
 ```sql
 
 select 2 + 6;
 select 3 - 9;
 select 2 * 3;
 select 2 * 3.3;
-select 5 / 2;       -- Ganzzahl der Division
-select 5 / 2.0;     -- korrektes Ergebnis
-select 5 % 2;       -- ganzzahliger Divisionsrest
+select 5 / 2;       --- Ganzzahl der Division
+select 5 / 2.0;     --- korrektes Ergebnis
+select 5 % 2;       --- ganzzahliger Divisionsrest
 
 select anr, aname, gewicht * 0.001 as [GEwicht in Kilo],
        amenge * gewicht * 0.001 as [Gesamtlagergewicht]
@@ -798,7 +845,7 @@ from artikel;
 .
 
 
--- Operator + fuer die Verkettung von Zeichenfolgen
+--- Operator + fuer die Verkettung von Zeichenfolgen
 ```sql
 select 'Der Lieferant' + lname + ' (' + lnr + '), wonht in ' +
         lstadt + ' und hat einen Status von ' + cast(status as varchar(10))
@@ -808,17 +855,17 @@ from lieferant;
 
 
 
--- Skalare Funktionen
+--- Skalare Funktionen
 ```sql
 select lname, DATALENGTH(lname) as [Anzahl Byte] len(lname) as[Anzahl Zeichen]
 from lieferant;
 
-select host_name();             -- Name des Servers auf dem SQL Server laeuft
-select host_id();               -- ID der aktuellen Arbeitsstation
+select host_name();             --- Name des Servers auf dem SQL Server laeuft
+select host_id();               --- ID der aktuellen Arbeitsstation
 
-select user_name();             -- Datenbankbenutzername
+select user_name();             --- Datenbankbenutzername
 select user_id();
-select suser_name()             -- Login
+select suser_name()             --- Login
 select suser_id();
 
 select newid();
@@ -827,21 +874,21 @@ select newid();
 
 
 
--- mathematische Funktionen
+--- mathematische Funktionen
 ```sql
 
-select round(233.871, 2);       -- auf/abrunden
+select round(233.871, 2);       --- auf/abrunden
 select round(233.871, -2);
 
-select rand();                  -- eine zufuellige Zahl zwischen 0 und 1
+select rand();                  --- eine zufuellige Zahl zwischen 0 und 1
 select round(rand() * 100,0)
 ```
 .
 
 
--- Zeichenfolge Funktionen
+--- Zeichenfolge Funktionen
 ```sql
-select char(39);                -- ASCI Zeichen Hochkomma
+select char(39);                --- ASCI Zeichen Hochkomma
 
 select replace('Hustensaftschmuggler', 'saft', 'bier');
 
@@ -851,8 +898,8 @@ select replicate('Bier' , 10);
 
 
 
--- Namen und Wohnort der Lieferanten in einer Spalte mit einem Abstand von 20 
--- Leerzeichen
+--- Namen und Wohnort der Lieferanten in einer Spalte mit einem Abstand von 20 
+--- Leerzeichen
 ```sql
 select lname + space(20) + lstadt
 from lieferant;
@@ -870,9 +917,9 @@ from lieferant
 
 
 
--- der Chef moechte die Lieferantennummern statt mit einem L mit einem K
--- beginnen lassen und der numerische Teil soll dreistellig sein und bei
--- 101 beginnen
+--- der Chef moechte die Lieferantennummern statt mit einem L mit einem K
+--- beginnen lassen und der numerische Teil soll dreistellig sein und bei
+--- 101 beginnen
 ```sql
 select lnr
 from lieferant;
@@ -887,7 +934,7 @@ from lieferant;
 select substring(lnr,2,2)
 from lieferant
 
--- Ziffern in Zahlen umwandeln
+--- Ziffern in Zahlen umwandeln
 ```
 .
 
@@ -899,7 +946,7 @@ from lieferant
 
 
 
--- um 100 erhoehen
+--- um 100 erhoehen
 ```sql
 
 select cast(substring(lnr,2,2) as int) +100
@@ -908,7 +955,7 @@ from lieferant
 .
 
 
--- vor die Zahl das K setzten, dazu muss die Zahl vorher String werden
+--- vor die Zahl das K setzten, dazu muss die Zahl vorher String werden
 ```sql
 
 select 'K' + cast(cast(substring(lnr,2,2) as int) +100 as varchar(4))
@@ -917,12 +964,12 @@ from lieferant;
 .
 
 
--- Datums- und Zeitfunktion
+--- Datums- und Zeitfunktion
 ```sql
 select getdate();
-select year(getdate());             -- Ergebnis numersich
-select month(getdate());            -- Ergebnis numersich
-select day(getdate());              -- Ergebnis numersich
+select year(getdate());             --- Ergebnis numersich
+select month(getdate());            --- Ergebnis numersich
+select day(getdate());              --- Ergebnis numersich
 
 select lnr, ldatum, day(ldatum), month(ldatum), year(ldatum)
 from lieferung;
@@ -933,47 +980,47 @@ select date();
 
 
 
--- bestimmen welcher Wochen### TAG der Wochenbeginn ist
+--- bestimmen welcher Wochen### TAG der Wochenbeginn ist
 
--- fuer Deutschland
+--- fuer Deutschland
 ```sql
 
-select @@datefirst;                 -- 1 --> Mon### TAG
+select @@datefirst;                 --- 1 --> Mon### TAG
 ```
 .
 
 
--- fuer USA
+--- fuer USA
 ```sql
 
 set language us_englisch;
-select @@datefirst;                 -- 7 --> Sonn### TAG
+select @@datefirst;                 --- 7 --> Sonn### TAG
 ```
 .
 
 
--- Russia
+--- Russia
 ````sql
 	set language russian;
-	select @@datefirst;                 -- 1 --> Mon### TAG
+	select @@datefirst;                 --- 1 --> Mon### TAG
 ````
 
 
--- Datumsfuntionen zum Berechnen von Datumswerten
+--- Datumsfuntionen zum Berechnen von Datumswerten
 ```sql
-select datename(dw,getdate());      -- Mittwoch --> alfanumerisch
-select datename(mm,getdate());      -- Juni     --> alfanumerisch
-select datename(yyyy,getdate());    -- 2022     --> alfanumerisch
+select datename(dw,getdate());      --- Mittwoch --> alfanumerisch
+select datename(mm,getdate());      --- Juni     --> alfanumerisch
+select datename(yyyy,getdate());    --- 2022     --> alfanumerisch
 
-select datepart(dd,getdate());      -- 1        --> numerisch
-select datepart(mm,getdate());      -- 6        --> numerisch
-select datepart(yyyy,getdate());    -- 2022     --> numerisch
+select datepart(dd,getdate());      --- 1        --> numerisch
+select datepart(mm,getdate());      --- 6        --> numerisch
+select datepart(yyyy,getdate());    --- 2022     --> numerisch
 ```
 .
 
 
 
--- Alle im August 1990 durchgefuehrten Lieferungen
+--- Alle im August 1990 durchgefuehrten Lieferungen
 ```sql
 select * from lieferung
 where datepart(mm,ldatum) = 8
@@ -983,7 +1030,7 @@ and datepart (yyyy,ldatum) = 1990;
 
 
 
--- Zahlungstermin 37 ### TAGe nach  Lieferdatum
+--- Zahlungstermin 37 ### TAGe nach  Lieferdatum
 ```sql
 select lnr, anr, ldatum, dateadd(dd, 37, ldatum) as [Zahlung]
 from lieferung;
@@ -992,7 +1039,7 @@ from lieferung;
 
 
 
--- Anzahl der Monate seit Lieferung bis Heute
+--- Anzahl der Monate seit Lieferung bis Heute
 ```sql
 select lnr, anr, ldatum, datediff(mm,ldatum,getdate()) as [Anzahl Monate]
 from lieferung;
@@ -1001,12 +1048,12 @@ from lieferung;
 
 
 
--- Datum Konvertieren
+--- Datum Konvertieren
 
--- nicht mit cast() konvertieren, da sonst unerwartete Ergebnisse
--- auftreten
+--- nicht mit cast() konvertieren, da sonst unerwartete Ergebnisse
+--- auftreten
 
--- Lieferungen in einem deutschen Format (dd.mm.yyyy) darstellen.
+--- Lieferungen in einem deutschen Format (dd.mm.yyyy) darstellen.
 ```sql
 select lnr, anr, cast(ldatum as char(10)) from Lieferung
 ```
@@ -1014,7 +1061,7 @@ select lnr, anr, cast(ldatum as char(10)) from Lieferung
 
 
 
--- besser ist die Funktion convert
+--- besser ist die Funktion convert
 ```sql
 
 select lnr, anr, convert(char(10),ldatum,104) from Lieferung;
@@ -1026,9 +1073,9 @@ Uebung 2:
 
 1.
 
--- Schreiben sie eine Abfrage auf Tabelle Lieferung 
--- in der Datenbank Standard, welche ihnen nachstehendes 
--- Ergebnis liefert
+--- Schreiben sie eine Abfrage auf Tabelle Lieferung 
+--- in der Datenbank Standard, welche ihnen nachstehendes 
+--- Ergebnis liefert
 ```sql
 select anr as [Artikelnummer], lmenge as [Liefermenge], 
 datename(dw,ldatum)+' der '+
@@ -1043,9 +1090,9 @@ from lieferung;
 
 2.
 
--- Schreiben sie eine Abfrage auf Tabelle Lieferung 
--- in der Datenbank Standard, welche ihnen nachstehendes  
--- Ergebnis liefert
+--- Schreiben sie eine Abfrage auf Tabelle Lieferung 
+--- in der Datenbank Standard, welche ihnen nachstehendes  
+--- Ergebnis liefert
 ```sql
 select anr as 'Artikelnummer', convert(char(10),ldatum,104) as 'Lieferdatum',
 'vor ' + cast(datediff(dd, convert(datetime,ldatum,104), getdate())/365 as varchar(10)) +
@@ -1065,24 +1112,24 @@ from lieferung;
 use standard
 go 
 
--- Gruppieren und Zusammenfassen von Dateien
+--- Gruppieren und Zusammenfassen von Dateien
 
--- Aggregatfunktionen
+--- Aggregatfunktionen
 
--- sie beziehen sich auf die Daten einer Spalte der Tabelle (ausser count)
--- und geben einen Zusammenfassungswert zurueck
+--- sie beziehen sich auf die Daten einer Spalte der Tabelle (ausser count)
+--- und geben einen Zusammenfassungswert zurueck
 
--- das Ergebnis ist genau ein Wert
+--- das Ergebnis ist genau ein Wert
 
--- alle Aggregatfunktionen ignorieren NULL-Marken
+--- alle Aggregatfunktionen ignorieren NULL-Marken
 
--- die fuenf am haufigsten gebrauchten Aggregatfunktionen sind
+--- die fuenf am haufigsten gebrauchten Aggregatfunktionen sind
 
---      avg     (average) Durchschnitt der nummerischen Spaltenwerte
---      max     der groesste Spaltenwert
---      min     der kleinste Spaltenwert
---      sum     die Summe der nummerischen Spaltenwerte 
---      count   die Anzahl der Spaltenwerte
+---      avg     (average) Durchschnitt der nummerischen Spaltenwerte
+---      max     der groesste Spaltenwert
+---      min     der kleinste Spaltenwert
+---      sum     die Summe der nummerischen Spaltenwerte 
+---      count   die Anzahl der Spaltenwerte
 ```sql
 select  sum(lmenge) as [Liefermenge gesamt],
         max(lmenge) as [groesste Liefermenge],
@@ -1095,7 +1142,7 @@ from lieferung;
 
 
 
--- Die groesste Liefermenge
+--- Die größte Liefermenge
 ```sql
 select max(lmenge) from lieferung;
 ```
@@ -1103,16 +1150,16 @@ select max(lmenge) from lieferung;
 
 
 
--- Neugierig: ich will wissen wer das ist!
+--- Neugierig: ich will wissen wer das ist!
 ```sql
-select max(lmenge),lnr from lieferung;   -- Fehler
+select max(lmenge),lnr from lieferung;   --- Fehler
 ```
 .
 
 
 
--- Alle Spalten in der Select-Liste die kein Argument einer Aggregatfunktion
--- sind muessen in einer group by Klausel stehen
+--- Alle Spalten in der Select-Liste die kein Argument einer Aggregatfunktion
+--- sind muessen in einer group by Klausel stehen
 ```sql
 select max(lmenge),lnr from lieferung
 group by lnr;
@@ -1121,10 +1168,10 @@ group by lnr;
 
 
 
--- das veraendert die Fragestellung
--- die groesste Lieferung eines jeden Lieferanten
+--- das veraendert die Fragestellung
+--- die groesste Lieferung eines jeden Lieferanten
 
--- Agregatfunktion COUNT
+--- Agregatfunktion COUNT
 ```sql
 insert into Lieferant values('L10','Meier',null,'Erfurt')
 ```
@@ -1132,37 +1179,42 @@ insert into Lieferant values('L10','Meier',null,'Erfurt')
 
 
 
--- Anzahl der Lieferanten
+--- Anzahl der Lieferanten
 ```sql
-select count(lnr) from lieferant;       -- immer richtig, weil die Primaer-Spalte 
-                                        -- als Argument verwendet wird
+select count(lnr) from lieferant;       --- immer richtig, weil die Primaer-Spalte 
+                                        --- als Argument verwendet wird
 
-select count(*) from lieferant;         -- immer richtig, weil es in einer Tabelle
-                                        -- keine leeren Datensaetze gibt
-                                        -- count(*) zaehlt die DS (Datensaetze) der
-                                        -- angebenen Tabelle
+select count(*) from lieferant;         --- immer richtig, weil es in einer Tabelle
+                                        --- keine leeren Datensaetze gibt
+                                        --- count(*) zaehlt die DS (Datensaetze) der
+                                        --- angebenen Tabelle
 
-select count(status) from lieferant;    -- nicht immer richtig,weil die Spalte 
-                                        -- Unbekannte WErte enthalten kann.
+select count(status) from lieferant;    --- nicht immer richtig,weil die Spalte 
+                                        --- Unbekannte WErte enthalten kann.
 ```
 .
 
 
 
--- alle Aggregatfunktionen ignorieren NULL-Marken
+--- alle Aggregatfunktionen ignorieren NULL-Marken
 ```sql
 
-select count(lnr) from lieferant;       -- 6 DS
-select count(status) from lieferant;    -- 5 DS
+select count(lnr) from lieferant;       --- 6 DS
+select count(status) from lieferant;    --- 5 DS
 ```
 .
 
 
 -------
+````sql
 select *
 from lieferant
+````
+.
 
--- Das groesste Gesamtlagergewicht aller Artikel in Kilo
+
+
+--- Das groesste Gesamtlagergewicht aller Artikel in Kilo
 ```sql
 select gewicht * 0.001 * amenge as [Gesamtlagergewicht]
 from artikel;
@@ -1178,7 +1230,7 @@ from artikel;
 .
 
 
--- die letzte Lieferung von 'A02'
+--- die letzte Lieferung von 'A02'
 ```sql
 select max(ldatum) from lieferung where anr = 'A02'
 ```
@@ -1186,19 +1238,19 @@ select max(ldatum) from lieferung where anr = 'A02'
 
 
 
--- Anzahl der Lieferanten die geliefert haben
+--- Anzahl der Lieferanten die geliefert haben
 ```sql
-select count(lnr) from lieferung;          -- FALSCH -- liefert die Anzahl 
-                                                     -- der Lieferungen
+select count(lnr) from lieferung;          --- FALSCH --- liefert die Anzahl 
+                                                     --- der Lieferungen
 
-select count(distinct lnr) from lieferung; -- RICHTIG
+select count(distinct lnr) from lieferung; --- RICHTIG
 ```
 .
 
 
 
--- Gesucht ist die groesste Status der Lieferanten am jeweiligen
--- Wohnort ...
+--- Gesucht ist die groesste Status der Lieferanten am jeweiligen
+--- Wohnort ...
 ```sql
 select lstadt, max(status)
 from lieferant
@@ -1208,20 +1260,20 @@ group by lstadt;
 
 
 
--- ... wenn der duschschnittliche Statuswert am jeweiligen Wohnort nicht kleiner
--- als 15 ist
+--- ... wenn der duschschnittliche Statuswert am jeweiligen Wohnort nicht kleiner
+--- als 15 ist
 ```sql
 select lstadt, max(status)
 from lieferant
 where avg(status) > 15
-group by lstadt;                -- FALSCH
+group by lstadt;                --- FALSCH
 ```
 .
 
 
 
--- in einer Where-KLausel darf niemals eine Aggregatfunktion stehen.
--- Die Bedingung ist eine Bedingung fuer die Gruppe!
+--- in einer Where-KLausel darf niemals eine Aggregatfunktion stehen.
+--- Die Bedingung ist eine Bedingung fuer die Gruppe!
 ```sql
 select lstadt, max(status)
 from lieferant
@@ -1232,12 +1284,12 @@ having avg(status) > 15;
 .
 
 
--- ohne die Aachner Lieferanten
+--- ohne die Aachner Lieferanten
 ```sql
 select lstadt, max(status)
 from lieferant
 group by lstadt
-having avg(status) > 15 and lstadt <> 'Aachen';     -- Unanstaendig
+having avg(status) > 15 and lstadt <> 'Aachen';     --- Unanstaendig
 ```
 .
 
@@ -1247,7 +1299,7 @@ select lstadt, max(status)
 from lieferant
 where lstadt <> 'Aachen'
 group by lstadt
-having avg(status) > 15;                            -- RICHTIG
+having avg(status) > 15;                            --- RICHTIG
 ```
 .
 
@@ -1258,8 +1310,8 @@ Uebung 3:
 
 1.
 
--- schreiben sie eine Abfrage, die alle im August durchgefuehrten 
--- Lieferungen zaehlt
+--- schreiben sie eine Abfrage, die alle im August durchgefuehrten 
+--- Lieferungen zaehlt
 ```sql
 select count(lnr) as [Anzahl der Lieferungen]
 from lieferung
@@ -1269,14 +1321,20 @@ where datepart(mm,ldatum) = 8
 
 
 
--- pruefen mit
+--- pruefen mit
+
+````sql
 select *
 from lieferung
+````
+.
+
+
 
 2.
 
--- schreiben sie eine Abfrage, welche die Anzahl aller Nicht-Nullwerte 
--- des Feldes "lstadt" in der Lieferantentabelle ermittelt
+--- schreiben sie eine Abfrage, welche die Anzahl aller Nicht-Nullwerte 
+--- des Feldes "lstadt" in der Lieferantentabelle ermittelt
 ```sql
 
 select count(lstadt) from lieferant;
@@ -1286,8 +1344,8 @@ select count(lstadt) from lieferant;
 
 3.
 
--- schreiben sie eine Abfrage, die die jeweils kleinste Lieferung eines
--- jeden Lieferanten anzeigt
+--- schreiben sie eine Abfrage, die die jeweils kleinste Lieferung eines
+--- jeden Lieferanten anzeigt
 ```sql
 select lnr, min(lmenge) 
 as [kleinste Liefermenge] 
@@ -1300,8 +1358,8 @@ group by lnr
 
 4.
 
--- schreiben sie eine Abfrage, die den ersten Lieferanten ermittelt, dessen
--- Name mit "S" beginnt (in alphabetischer Reihenfolge)
+--- schreiben sie eine Abfrage, die den ersten Lieferanten ermittelt, dessen
+--- Name mit "S" beginnt (in alphabetischer Reihenfolge)
 ```sql
 
 select * from lieferant
@@ -1311,7 +1369,8 @@ order by lname asc
 .
 
 
--- oder
+--- oder
+
 ```sql
 
 select min(lname)
@@ -1323,8 +1382,8 @@ where lname like 's%';
 
 5.
 
--- schreiben sie eine Abfrage, mit der sie den hoechsten Lagerbestand von
--- Artikeln am jeweiligen Lagerort ermitteln koennen
+--- schreiben sie eine Abfrage, mit der sie den hoechsten Lagerbestand von
+--- Artikeln am jeweiligen Lagerort ermitteln koennen
 ```sql
 
 select astadt, max(amenge)
@@ -1334,12 +1393,12 @@ group by astadt;
 .
 
 
--- pruefen mit
+--- pruefen mit
 select * from artikel
 
 6.
 
--- wie viele unterschiedliche Artikel wurden von jedem Lieferanten geliefert
+--- wie viele unterschiedliche Artikel wurden von jedem Lieferanten geliefert
 ```sql
 select lnr, 
 count (distinct anr)
@@ -1352,7 +1411,7 @@ group by lnr;
 
 7.
 
--- gesucht sind die Artikelnummern die weniger als dreimal geliefert wurden
+--- gesucht sind die Artikelnummern die weniger als dreimal geliefert wurden
 ```sql
 select anr
 from lieferung
@@ -1365,8 +1424,8 @@ having count (anr) < 3
 
 8.
 
--- gesucht sind die Lieferantennummern und die Gesamtliefermenge der Lieferanten
--- die seit dem 13.07.1990 eine Gesamtliefermenge von mehr als 600 Stueck hatten
+--- gesucht sind die Lieferantennummern und die Gesamtliefermenge der Lieferanten
+--- die seit dem 13.07.1990 eine Gesamtliefermenge von mehr als 600 Stueck hatten
 ```sql
 select lnr, sum (lmenge)
 from lieferung
@@ -1380,10 +1439,10 @@ having sum (lmenge) > 600
 
 9.
 
--- gesucht ist der in den jeweiligen Wohnorten der Lieferanten kleinste und groesste
--- Statuswert, fuer alle die Lieferanten mit einer Lieferantennummer zwischen
--- "L01" und "L99" wenn der kleinste Statuswert der jeweiligen Stadt 10 uebersteigt
--- und der groesste Statuswert der jeweiligen Stadt 50 nicht uebersteigt
+--- gesucht ist der in den jeweiligen Wohnorten der Lieferanten kleinste und groesste
+--- Statuswert, fuer alle die Lieferanten mit einer Lieferantennummer zwischen
+--- "L01" und "L99" wenn der kleinste Statuswert der jeweiligen Stadt 10 uebersteigt
+--- und der groesste Statuswert der jeweiligen Stadt 50 nicht uebersteigt
 ```sql
 
 select min(status), max(status), lstadt
@@ -1399,21 +1458,25 @@ having min(status) > 10 and max(status) <= 50;
 
 ### TAG 4
 
+````sql
 insert into lieferung values('L04', 'A03', 500, '10.06.2021');
 insert into lieferung values('L04', 'A02', 500, '20.06.2021');
 insert into lieferung values('L04', 'A01', 500, '01.06.2022');
 insert into lieferung values('L04', 'A03', 500, CONVERT(char(10),GETDATE(),104));
 
-select *
-from lieferung
+select * from lieferung
+````
+.
 
--- CUBE und ROLLUP
--- ermoeglichen zusammen mit Aggregatfunktionen erweiterte Zusammenfassungswerte
--- die Funktionen werden in der group by-Klausel verwendet
 
--- die Lieferantennummer, der Monat der Lieferung , das Jahr der Lieferung und
--- die Gesamtliefermenge aller Lieferanten mit einer Liefermenge
--- von mind. 100 Stueck
+
+#### --- CUBE und ROLLUP
+--- ermoeglichen zusammen mit Aggregatfunktionen erweiterte Zusammenfassungswerte
+--- die Funktionen werden in der group by-Klausel verwendet
+
+--- die Lieferantennummer, der Monat der Lieferung , das Jahr der Lieferung und
+--- die Gesamtliefermenge aller Lieferanten mit einer Liefermenge
+--- von mind. 100 Stueck
 ```sql
 select lnr, datename(mm,ldatum) as [Monat], datepart(yyyy,ldatum) as [Jahr],
 sum(lmenge) as [Gesamtliefermenge]
@@ -1425,12 +1488,12 @@ group by lnr, datename(mm,ldatum), datepart(yyyy,ldatum);
 
 
 
--- Da wir ein sehr grosses Gruppenbildungsmerkmal verwenden muessen
--- Ergebniss wenig aussagekraeftig
---          eine Gesamtliefermenge ueber alle Lieferungen
---          eine Gesamtliefermenge fuer jeden Lieferanten
---          eine Gesamtliefermenge fuer jeden Lieferanten im jeweiligen Monat
---          eine Gesamtliefermenge fuer jeden Lieferanten im jeweiligen Monat und Jahr
+--- Da wir ein sehr grosses Gruppenbildungsmerkmal verwenden muessen
+--- Ergebniss wenig aussagekraeftig
+---          eine Gesamtliefermenge ueber alle Lieferungen
+---          eine Gesamtliefermenge fuer jeden Lieferanten
+---          eine Gesamtliefermenge fuer jeden Lieferanten im jeweiligen Monat
+---          eine Gesamtliefermenge fuer jeden Lieferanten im jeweiligen Monat und Jahr
 ```sql
 
 select lnr, datename(mm,ldatum) as [Monat], datepart(yyyy,ldatum) as [Jahr],
@@ -1443,7 +1506,7 @@ order by 1,2,3;
 .
 
 
--	uebertreiben -- weiter Zwischenaggragate
+-	uebertreiben --- weiter Zwischenaggragate
 ```sql
 select lnr, datename(mm,ldatum) as [Monat], datepart(yyyy,ldatum) as [Jahr],
 sum(lmenge) as [Gesamtliefermenge]
@@ -1456,7 +1519,7 @@ order by 1,2,3;
 
 
 
--- loeschen
+#### --- loeschen
 ```sql
 
 delete lieferung where lmenge = 500
@@ -1464,7 +1527,7 @@ delete lieferung where lmenge = 500
 .
 
 
--- pruefen
+#### --- pruefen
 ```sql
 select * from lieferung
 ```
@@ -1472,14 +1535,14 @@ select * from lieferung
 
 
 
--- Rangfolgefuntionen
---      RANK    
---      DENSE-RANK
---      ROW_NUMBER
+--- Rangfolgefuntionen
+---      RANK    
+---      DENSE-RANK
+---      ROW_NUMBER
 
--- RANK 
+#### --- RANK 
 
--- Rangfolge der Lieferanten anhand ihrer Gesamtlieferungen
+--- Rangfolge der Lieferanten anhand ihrer Gesamtlieferungen
 ```sql
 select lnr, rank() over(order by sum(lmenge) desc) as [Rang], sum(lmenge)
         as [Gesamtliefermenge]
@@ -1489,12 +1552,15 @@ group by lnr;
 .
 
 
-
+````sql
 insert into lieferung values('L02','A04',200,'03.06.2022');
 
--- bei gleicher Rangfolge ensteht in der Spalte Rang eine Luecke.
+````
+.
 
--- DENSE_RANK
+--- bei gleicher Rangfolge ensteht in der Spalte Rang eine Luecke.
+
+#### --- DENSE_RANK
 ```sql
 select lnr, dense_rank() over(order by sum(lmenge) desc) as [Rang], sum(lmenge)
         as [Gesamtliefermenge]
@@ -1505,9 +1571,10 @@ group by lnr;
 
 
 
--- Zeilennummern mit ROW_NUMBER
+#### --- ROW_NUMBER
+--- Zeilennummern mit ROW_NUMBER
 
--- Alle Angaben zu den Lieferanten zuzueglich einer laufenden Nummer
+--- Alle Angaben zu den Lieferanten zuzueglich einer laufenden Nummer
 ```sql
 
 select row_number() over(order by lnr asc) as [laufende Nummer],
@@ -1517,18 +1584,19 @@ from lieferant;
 .
 
 
--- das Ergebnis einer Abfage in eine Datenbanktabelle speichern
--- er kann gespeichert werden in eine neue permanenten Tabelle
--- oder in temporaeren Tabellen
--- temporaere Tabellen koennen lokal oder gobal sein
--- temporaere Tabellen koennen von jedem Datenbanbenutzer erstellt werden
--- sie existieren solange wie die Sitzung die sie erstellt hat existiert
+--- das Ergebnis einer Abfage in eine Datenbanktabelle speichern
+--- er kann gespeichert werden in eine neue permanenten Tabelle
+--- oder
+ in temporaeren Tabellen
+--- temporaere Tabellen koennen lokal oder gobal sein
+--- temporaere Tabellen koennen von jedem Datenbanbenutzer erstellt werden
+--- sie existieren solange wie die Sitzung die sie erstellt hat existiert
 
--- permanente Tabellen koennen nur von Benutzern mit der Berechtigung
--- create table.. und der alter schema.. Berechtigung fuer das Schema
--- wo die Tabelle erstellt wird, erstellt werden.
+--- permanente Tabellen koennen nur von Benutzern mit der Berechtigung
+--- create table.. und der alter schema.. Berechtigung fuer das Schema
+--- wo die Tabelle erstellt wird, erstellt werden.
 
--- 1. permanente Tabelle
+#### --- 1. permanente Tabelle
 ```sql
 
 select row_number() over(order by lnr asc) as [laufende Nummer],
@@ -1539,7 +1607,7 @@ from lieferant;
 .
 
 
--- pruefen
+--- pruefen
 ```sql
 
 select * from lief_m_nr;
@@ -1547,7 +1615,7 @@ select * from lief_m_nr;
 .
 
 
--- 2. lokal temp. Tabelle
+#### --- 2. lokal temp. Tabelle
 ```sql
 
 select row_number() over(order by lnr asc) as [laufende Nummer],
@@ -1558,7 +1626,7 @@ from lieferant;
 .
 
 
--- pruefen
+--- pruefen
 ```sql
 
 select * from #lief_m_nr;
@@ -1566,7 +1634,7 @@ select * from #lief_m_nr;
 .
 
 
--- 3. globale temp. Tabelle
+#### --- 3. globale temp. Tabelle
 ```sql
 
 select row_number() over(order by lnr asc) as [laufende Nummer],
@@ -1576,12 +1644,16 @@ from lieferant;
 ```
 .
 
-
+````sql
 select * from ##lief_m_nr;
+````
+.
 
--- am temporaersten sind Tabellenvariable
 
--- diese existieren fuer die Zeitdauer eines Stapels
+
+--- am temporaersten sind Tabellenvariable
+
+--- diese existieren fuer die Zeitdauer eines Stapels
 ```sql
 declare @tab table([Laufende Nummer] int,
                   Lieferantennummer char(3),
@@ -1604,25 +1676,29 @@ go
 use standard;
 go
 
--- Mengenoperatoren aus der Mengenmathematik
+#### --- Mengenoperatoren aus der Mengenmathematik
 
--- Adition
--- Subtraktion
--- Schnittmenge
+--- Adition
+--- Subtraktion
+--- Schnittmenge
 
--- Union M1 + M2 = M2/M2
+--- Union M1 + M2 = M2/M2
 
 --Alle Orte die Wohnorte und Lagerorte sind
-
+````sql
 select lstadt from lieferant
 union
 select astadt from artikel;
 
--- beide Abfragen links und rechts vom Operator muessen die gleiche Anzahl
--- von Spalten haben und  die Spalten muessen zueinander kompatibel sein.
--- das nennt man Union-Kompatibilitaet
+````
+.
 
--- das formatieren des Ergbnis
+
+--- beide Abfragen links und rechts vom Operator muessen die gleiche Anzahl
+--- von Spalten haben und  die Spalten muessen zueinander kompatibel sein.
+--- das nennt man Union-Kompatibilitaet
+
+--- das formatieren des Ergbnis
 ```sql
 select lstadt as [Wohn-und Lagerorte] from lieferant
 union
@@ -1633,8 +1709,8 @@ order by lstadt desc;
 
 
 
--- Union eleminiert doppelte Datensaetze im Ergebnis (wie distinct)
--- das kann ich ausschalten
+--- Union eleminiert doppelte Datensaetze im Ergebnis (wie distinct)
+--- das kann ich ausschalten
 ```sql
 select lstadt as [Wohn-und Lagerorte] from lieferant
 union all
@@ -1645,12 +1721,12 @@ order by lstadt desc;
 
 
 
--- EXCEPT
--- entspricht einer Subtraktion -- gibt saemtliche Datensaetze der
--- Abfrage links vom Operator zurueck, die nicht in der Abfrage rechts
--- vom Operator vorkommen
+#### --- EXCEPT
+--- entspricht einer Subtraktion --- gibt saemtliche Datensaetze der
+--- Abfrage links vom Operator zurueck, die nicht in der Abfrage rechts
+--- vom Operator vorkommen
 
--- Wohnort von Lieferanten wo keine Artikel gelagert sind
+--- Wohnort von Lieferanten wo keine Artikel gelagert sind
 ```sql
 select lstadt as [Wohn-und Lagerorte] from lieferant
 except
@@ -1660,11 +1736,11 @@ select astadt from artikel;
 
 
 
--- INTERSEC
--- gibt saemtliche Datensaetze zurueck die sowohl in der Abfrage rechts vom Operator
--- als auch in der Abfrage links vom Operator vorkommen
+#### --- INTERSEC
+--- gibt saemtliche Datensaetze zurueck die sowohl in der Abfrage rechts vom Operator
+--- als auch in der Abfrage links vom Operator vorkommen
 
--- Ortsnamen wo Lieferanten wohnen und auch Artikel gelagert werden
+--- Ortsnamen wo Lieferanten wohnen und auch Artikel gelagert werden
 ```sql
 select lstadt as [Orte] from lieferant
 intersect
@@ -1674,8 +1750,8 @@ select astadt from artikel;
 
 
 
--- Gesucht sind Nummer, Namen und Wohnorte der Lieferanten
--- die dort wohnen wo Artikel A04 lagert.
+--- Gesucht sind Nummer, Namen und Wohnorte der Lieferanten
+--- die dort wohnen wo Artikel A04 lagert.
 ```sql
 select lnr, lname, lstadt
 from lieferant
@@ -1685,7 +1761,7 @@ where lstadt = (select astadt from artikel where anr = 'A04');
 
 
 
--- Gesucht sind die Nummmern und Namen der Artikel die bereits geliefert wurden.
+--- Gesucht sind die Nummmern und Namen der Artikel die bereits geliefert wurden.
 ```sql
 select anr from lieferung
 
@@ -1701,14 +1777,25 @@ where anr in(select anr from lieferung);
 Welche Hamburger Lieferanten haben nach dem 01.08.90 rote und blaue
 Artikel geliefert?
 */
-
+````sql
 select farbe from artikel
-
+````
+.
+````sql
 select lname from lieferant
-
+````
+.
+````sql
 select ldatum from lieferung
+````
+.
+````sql
 
 select anr from artikel where farbe in('rot','blau')
+````
+.
+
+````sql
 
 select *
 from lieferant
@@ -1717,6 +1804,15 @@ and lnr in (select lnr
         from lieferung
         where ldatum > '01.08.90'
         and anr in(select anr from artikel where farbe in('rot','blau')))
+````
+.
+
+
+
+
+
+
+
 
 -----------------------------------------------------------------------
 
@@ -1729,24 +1825,36 @@ Alle Angaben zu den Lieferanten deren Statuswert ueber dem durchschnittlichen
 Statuswert der Lieferanten liegt, die in der gleichen Stadt wohnen
 wie Lieferant L02.
 */
-
+````sql
 select lstadt
 from lieferant
 where lnr = 'L02'
+````
+.
 
+
+````sql
 select avg(status) 
 from lieferant
+````
+.
 
+
+````sql
 select * from lieferant
 where status > (select avg(status) from lieferant
             where lstadt = (select lstadt from lieferant where lnr = 'L02'))
+
+````
+.
+
 
 /*
 Nummern und Namen der Artikel die im August 1990 von Lieferanten geliefert wurden 
 die mindestens 3x geliefert werden.
 */
 
--- 1. Frage: welche Lieferanten haben mind. 3 x geliefert?
+--- 1. Frage: welche Lieferanten haben mind. 3 x geliefert?
 ```sql
 select lnr from lieferung group by lnr having count(lnr) >= 3
 ```
@@ -1754,7 +1862,7 @@ select lnr from lieferung group by lnr having count(lnr) >= 3
 
 
 
--- 2. Frage: haben diese Lieferanten im August 1990 geliefert
+--- 2. Frage: haben diese Lieferanten im August 1990 geliefert
 ```sql
 select anr 
 from lieferung
@@ -1765,7 +1873,7 @@ from lieferung
 .
 
 
--- 3. Wenn ja was?
+--- 3. Wenn ja was?
 ```sql
 (select anr 
         from lieferung
@@ -1776,7 +1884,7 @@ from lieferung
 .
 
 
--- 4. Frage Welche Nummer und welchen Namen haben die Artikel
+--- 4. Frage Welche Nummer und welchen Namen haben die Artikel
 ```sql
 select anr, aname
 from artikel 
@@ -1804,7 +1912,8 @@ where lnr in (select lnr
 .
 
 
--- oder 
+--- oder
+
 ```sql
 select convert(char(10),ldatum,104) as [Lieferdatum]
 from lieferung
@@ -1858,7 +1967,7 @@ where lnr in(select lnr
 
 
 
--- delete artikel where anr > 'A06' 
+--- delete artikel where anr > 'A06' 
 
 /* Nummern und Namen von Artikel die mindestens zweimal geliefert wurden, 
 von Lieferanten die ebenfalls mehr als zweimal geliefert haben.
@@ -1870,12 +1979,13 @@ select anr, aname
                 from lieferung
                 group by anr
                 having count(anr) >=2)
-				```
+```
 .
 
 
 
---oder
+--- oder
+
 
 ```sql
 select anr, aname
@@ -1900,16 +2010,16 @@ from Artikel;
 
 
 
--- korrelierte Unterabfragen
+--- korrelierte Unterabfragen
 
--- langsamste Art von Unterabfragen
--- fast jede korrelierte Unterabfrage kann in eine einfache Unterabfrage
--- oder in einen Join umgewandelt werden.
+--- langsamste Art von Unterabfragen
+--- fast jede korrelierte Unterabfrage kann in eine einfache Unterabfrage
+--- oder in einen Join umgewandelt werden.
 
--- im Gegensatz zu einfachen Unterabfragen beginnt eine korrelierte
--- Unterabfrage mit der auesseren Abfrage
+--- im Gegensatz zu einfachen Unterabfragen beginnt eine korrelierte
+--- Unterabfrage mit der auesseren Abfrage
 
--- Lieferanenten die mindestens dreimal geliefert haben
+--- Lieferanenten die mindestens dreimal geliefert haben
 ```sql
 select *
 from lieferant as a
@@ -1920,7 +2030,8 @@ where 3 <= (select count(lnr)
 .
 
 
--- oder
+--- oder
+
 ```sql
 select *
 from lieferant
@@ -1932,9 +2043,9 @@ where 3 <= (select count(lnr)
 
 
 
--- delete lieferung where datepart(yyyy,ldatum) > 1990;
+--- delete lieferung where datepart(yyyy,ldatum) > 1990;
 
--- Alle Angaben zu Lieferanten die geliefert haben
+--- Alle Angaben zu Lieferanten die geliefert haben
 ```sql
 select *
 from lieferant as a
@@ -1946,7 +2057,8 @@ where exists (select *
 
 
 
--- oder
+--- oder
+
 ```sql
 select *
 from lieferant
@@ -1961,57 +2073,62 @@ where exists (select *
 ---------------------------------------------------------------------
 
 ### TAG 6:
+````sql
 
 use standard
 go 
+````
+.
 
--- loeschen
--- delete lieferant where lnr > 'L05';
--- delete lieferung where lmenge = 500 or datepart(yyyy,ldatum) > 1990;
+
+--- loeschen
+--- delete lieferant where lnr > 'L05';
+--- delete lieferung where lmenge = 500 or datepart(yyyy,ldatum) > 1990;
 ````sql
 	select * 
 	from lieferant cross join lieferung;
 ````
 
 
--- kartesisches Produkt wir immer groesser je mehr cross joins ausgefuehrt werden
+--- kartesisches Produkt wir immer groesser je mehr cross joins ausgefuehrt werden
 ````sql
 	select * 
 	from lieferant cross join lieferung cross join artikel 
-cross join lieferant as a 
-cross join lieferung as b 
-cross join artikel as c
+		cross join lieferant as a 
+		cross join lieferung as b 
+		cross join artikel as c
 ````
 
 
--- INNER JOINS
+#### --- INNER JOINS
 
--- liefert alle Datensaetze der am Join beteiligten Tabellen die die
--- Verknuepfungsbedingungen erfuellen
+--- liefert alle Datensaetze der am Join beteiligten Tabellen die die
+--- Verknuepfungsbedingungen erfuellen
 
--- Lieferanten mit ihren Lieferungen
+--- Lieferanten mit ihren Lieferungen
 ````sql
 	select *
 	from lieferant join lieferung on lieferant.lnr = lieferung.lnr;
 ````
 
 
--- oder 
+--- oder
+
 ````sql
 	select *
 	from lieferant as a join lieferung as b on a.lnr = b.lnr;
 ````
 
 
--- im  dargstellten Ergebnis besteht eine Redundanz an Tabellenspalten (lnr)
--- wenn die entfernt wird sprechen wir ueber einen NATURAL Join
+--- im  dargstellten Ergebnis besteht eine Redundanz an Tabellenspalten (lnr)
+--- wenn die entfernt wird sprechen wir ueber einen NATURAL Join
 ````sql
 	select a.lnr, lname, status, lstadt, anr, lmenge, ldatum
 	from lieferant as a join lieferung as b on a.lnr = b.lnr;
 ````
 
 
--- die Lieferungen Hamburger Lieferanten im August 1990
+--- die Lieferungen Hamburger Lieferanten im August 1990
 ````sql
 	select a.lnr, lname, status, lstadt, anr, lmenge, ldatum
 	from lieferant as a join lieferung as b on a.lnr = b.lnr
@@ -2021,35 +2138,35 @@ and datepart(yyyy,ldatum) = 1990;
 ````
 
 
--- Nummern und Namen der Lieferanten die geliefert haben
+--- Nummern und Namen der Lieferanten die geliefert haben
 ````sql
 	select a.lnr, lname
 	from lieferant as a join lieferung as b on a.lnr = b.lnr
 ````
 
 
--- Im Ergebnis erscheinen 12 Datensaetze. Einige sind identisch.
+--- Im Ergebnis erscheinen 12 Datensaetze. Einige sind identisch.
 ````sql
 	select *
 	from lieferant as a join lieferung as b on a.lnr = b.lnr
 ````
 
 
--- aus der logischen Menge des Joins zwischen Lieferant und Lieferung
--- lasse ich mir die Spalten lnr und lname anzeigen
+--- aus der logischen Menge des Joins zwischen Lieferant und Lieferung
+--- lasse ich mir die Spalten lnr und lname anzeigen
 
--- wie entferne ich die doppelten DS -- mit DISTINCT
+--- wie entferne ich die doppelten DS --- mit DISTINCT
 ````sql
 	select distinct a.lnr, lname
 	from lieferant as a join lieferung as b on a.lnr = b.lnr
 ````
 
 
--- wenn bei einem Join nur die Spalten einer der am Join beteiligten
--- Tabellen angezeigt werden, dann benoetige ich DISTINCT
+--- wenn bei einem Join nur die Spalten einer der am Join beteiligten
+--- Tabellen angezeigt werden, dann benoetige ich DISTINCT
 
--- Nummern, Namen und Lieferdatum der roten und blauen Artikel
--- die von Lieferanten aus Ludwigshafen geliefert wurden
+--- Nummern, Namen und Lieferdatum der roten und blauen Artikel
+--- die von Lieferanten aus Ludwigshafen geliefert wurden
 ````sql
 	select a.anr, aname, ldatum
 	from artikel as a join lieferung as b on a.anr = b.anr
@@ -2059,11 +2176,11 @@ and lstadt = 'Ludwigshafen';
 ````
 
 
--- Joins eignen sich hervorragend fuer Unterabfragen in der
--- FROM -Klausel
+--- Joins eignen sich hervorragend fuer Unterabfragen in der
+--- FROM -Klausel
 
--- Nummern, Namen und Anzahl ihrer Lieferungen fuer alle Lieferanten
--- die  mindestens 2x geliefert haben
+--- Nummern, Namen und Anzahl ihrer Lieferungen fuer alle Lieferanten
+--- die  mindestens 2x geliefert haben
 ````sql
 	select a.lnr, lname, anz as [Anzahl Lieferung]
 	from lieferant as a join (select lnr, count(*) as [anz]
@@ -2073,7 +2190,7 @@ where anz >= 2;
 ````
 
 
--- 1. korrelierende Unterabfrage 
+--- 1. korrelierende Unterabfrage 
 ````sql
 	select lnr, lname
 	from lieferant
@@ -2083,7 +2200,7 @@ where exists (select *
 ````
 
 
--- 2. einfache Unterabfrage 
+--- 2. einfache Unterabfrage 
 ````sql
 	select lnr, lname
 	from lieferant
@@ -2091,7 +2208,7 @@ where lnr in (select lnr from lieferung);               --schneller
 ````
 
 
--- 3. Join Abfrage 
+--- 3. Join Abfrage 
 ````sql
 	select distinct a.lnr, lname
 	from lieferant as a join 
@@ -2101,19 +2218,19 @@ lieferung as b on a.lnr = b.lnr;                        --am schnellsten
 
 -------
 
--- hinter jedem Join steht ein kartesisches Produkt
--- darum ist folgende Anweisung falsch!
+--- hinter jedem Join steht ein kartesisches Produkt
+--- darum ist folgende Anweisung falsch!
 
--- die Nummern und Namen der Lieferanten die noch nie geliefert haben
+--- die Nummern und Namen der Lieferanten die noch nie geliefert haben
 ````sql
 	select distinct a.lnr, lname
 	from lieferant as a join 
-lieferung as b on a.lnr <> b.lnr;           -- falsches Ergebnis
+lieferung as b on a.lnr <> b.lnr;           --- falsches Ergebnis
 ````
 
 
--- bei naeherer Betrachtung enthaelt das Ergebnis 48 DS, 60 DS des
--- kartesischen Produktes minus 12 DS die logisch zusammen gehoeren
+--- bei naeherer Betrachtung enthaelt das Ergebnis 48 DS, 60 DS des
+--- kartesischen Produktes minus 12 DS die logisch zusammen gehoeren
 ````sql
 	select * 
 	from lieferant as a join lieferung as b
@@ -2121,68 +2238,68 @@ lieferung as b on a.lnr <> b.lnr;           -- falsches Ergebnis
 ````
 
 
--- die oben genannte Fragestellung kann man trotzdem mit
--- einem JOIN beantworten
+--- die oben genannte Fragestellung kann man trotzdem mit
+--- einem JOIN beantworten
 
--- es wird ein OUTER Join benoetigt- --> die Fragestellung wird etwas spaeter
--- wieder aufgenommen
+--- es wird ein OUTER Join benoetigt- --> die Fragestellung wird etwas spaeter
+--- wieder aufgenommen
 
--- aufnehmen eines Testdatensatz --> eine Lieferung fuer die es keinen
--- Lieferanten gibt
--- das laesst das Datenbanksystem micht zu --> referentielle Integritaet
--- darum muessen wir tricksen
+--- aufnehmen eines Testdatensatz --> eine Lieferung fuer die es keinen
+--- Lieferanten gibt
+--- das laesst das Datenbanksystem micht zu --> referentielle Integritaet
+--- darum muessen wir tricksen
 ````sql
 	alter table lieferung drop constraint lnr_fs;
-	go 
-
-insert into lieferung values('L33','A05',500,getdate());
 go 
 
-alter table lieferung with nocheck
-add constraint lnr_fs foreign key(lnr) references lieferant(lnr);
+	insert into lieferung values('L33','A05',500,getdate());
+go 
+
+	alter table lieferung with nocheck
+	add constraint lnr_fs foreign key(lnr) references lieferant(lnr);
 go
 ````
 
 
 -------
 
--- linker OUTER Join
+#### --- linker OUTER Join
 
--- gesucht sind alle Lieferanten mit ihren Lieferungen und auch die
--- Lieferanten die noch nicht geliefert haben
+--- gesucht sind alle Lieferanten mit ihren Lieferungen und auch die
+--- Lieferanten die noch nicht geliefert haben
 ````sql
 	select *
 	from lieferant as a left join lieferung as b on a.lnr = b.lnr
 ````
 
 
--- rechter OUTER Join
+#### --- rechter OUTER Join
 
--- gesucht sind alle Lieferanten mit ihren Lieferungen und die
--- Lieferungen denen kein Lieferant zugeordnet werden kann
+--- gesucht sind alle Lieferanten mit ihren Lieferungen und die
+--- Lieferungen denen kein Lieferant zugeordnet werden kann
 ````sql
 	select *
 	from lieferant as a right join lieferung as b on a.lnr = b.lnr
 ````
 
 
--- voller OUTER Join
+#### --- voller OUTER Join
 
--- gesucht sind alle Lieferanten mit ihren Lieferungen, weiterhin 
--- die Lieferanten die noch nicht geliefert haben und die
--- Lieferungen denen kein Lieferant zugeordnet werden kann
+--- gesucht sind alle Lieferanten mit ihren Lieferungen, weiterhin 
+--- die Lieferanten die noch nicht geliefert haben und die
+--- Lieferungen denen kein Lieferant zugeordnet werden kann
 ````sql
 	select *
 	from lieferant as a full join lieferung as b on a.lnr = b.lnr
 ````
 
 
--- also zurueck zur Frage: Nummern und Namen der Lieferanten 
--- die noch nicht  geliefert haben
+--- also zurueck zur Frage: Nummern und Namen der Lieferanten 
+--- die noch nicht  geliefert haben
 ````sql
 	select a.lnr,lname
 	from lieferant as a left join lieferung as b on a.lnr = b.lnr
-where b.lnr is null;
+	where b.lnr is null;
 ````
 
 
@@ -2194,27 +2311,27 @@ where b.lnr is null;
 
  1. 
 
- -- die Daten aller Lieferanten aus Ludwigshafen?
+ --- die Daten aller Lieferanten aus Ludwigshafen?
 ````sql
 	 select *
  	from Lieferant 
- where lstadt = 'Ludwigshafen'
+ 	where lstadt = 'Ludwigshafen'
 ````
 
 
  2.
 
- -- die Nummern, Namen und Lagerorte aller gelieferter Artikel
+ --- die Nummern, Namen und Lagerorte aller gelieferter Artikel
 ````sql
 	 select distinct a.anr, aname, astadt
  	from artikel a, lieferung b
- where a.anr = b.anr;
+ 	where a.anr = b.anr;
 ````
 
 
  3.
 
- -- die Nummern und Namen aller Artikel und ihr Gewicht in kg
+ --- die Nummern und Namen aller Artikel und ihr Gewicht in kg
 ````sql
 	 select anr, aname, gewicht * 0.001 as [kg]
  	from artikel;
@@ -2223,8 +2340,8 @@ where b.lnr is null;
 
  4. 
 
- -- die Namen aller Lieferanten aus Aachen mit einem Statuswert 
- -- zwischen 20 und 30
+ --- die Namen aller Lieferanten aus Aachen mit einem Statuswert 
+ --- zwischen 20 und 30
 ````sql
 	 select lname 
  	from lieferant
@@ -2234,8 +2351,8 @@ where b.lnr is null;
 
  5.
 
- -- die Nummern und Namen aller Artikel, deren Gewicht 
- -- 12, 14 oder 17 Gramm betraegt
+ --- die Nummern und Namen aller Artikel, deren Gewicht 
+ --- 12, 14 oder 17 Gramm betraegt
 ````sql
 	 select anr, aname
  	from artikel
@@ -2245,7 +2362,7 @@ where b.lnr is null;
 
  6.
 
- -- die Daten aller Lieferungen von Lieferanten aus Hamburg 
+ --- die Daten aller Lieferungen von Lieferanten aus Hamburg 
 ````sql
 	 select *
  	from lieferung
@@ -2257,8 +2374,8 @@ where b.lnr is null;
 
  7. 
 
--- Artikelnummern, Artikelname und Lieferantennummern und Lieferantennamen 
--- mit uebereinstimmenden Lagerort und Wohnort
+--- Artikelnummern, Artikelname und Lieferantennummern und Lieferantennamen 
+--- mit uebereinstimmenden Lagerort und Wohnort
 ````sql
 	 select anr,aname,lnr,lname 
  	from artikel join lieferant on astadt = lstadt;
@@ -2267,48 +2384,48 @@ where b.lnr is null;
 
  8.
 
- -- Artikelnummer, Artikelname und Lagerort aller gelieferten Artikel 
- -- und Lieferantennummer Lieferantenname 
- -- und Wohnort des jeweiligen Lieferanten,
- -- sofern Lagerort und Wohnort uebereinstimmen
+ --- Artikelnummer, Artikelname und Lagerort aller gelieferten Artikel 
+ --- und Lieferantennummer Lieferantenname 
+ --- und Wohnort des jeweiligen Lieferanten,
+ --- sofern Lagerort und Wohnort uebereinstimmen
 ````sql
 	 select anr, aname, astadt, lnr, lname, lstadt
  	from artikel, lieferant
- where astadt = lstadt
- and anr + lnr in (select anr +lnr
+ 	where astadt = lstadt
+ 	and anr + lnr in (select anr +lnr
                    from lieferung)
 ````
 
 
  9.
 
- -- Paare von Artikelnummern, von Artikeln mit gleichem Lagerort 
- -- (Jedes Paar soll nur einmal ausgegeben werden)
+ --- Paare von Artikelnummern, von Artikeln mit gleichem Lagerort 
+ --- (Jedes Paar soll nur einmal ausgegeben werden)
 ````sql
 	 select a.anr, b.anr
  	from artikel a, artikel b
- where a.astadt = b.astadt
- and a.anr < b.anr;
+ 	where a.astadt = b.astadt
+ 	and a.anr < b.anr;
 ````
 
 
  10.
  
- -- Nummern aller Lieferanten, die mindestens einen Artikel geliefert
- -- haben den auch Lieferant 'L03' geliefert hat
+ --- Nummern aller Lieferanten, die mindestens einen Artikel geliefert
+ --- haben den auch Lieferant 'L03' geliefert hat
 ````sql
 	  select lnr 
   	from lieferung
-  where anr in (select anr 
+  	where anr in (select anr 
                 from lieferung
                 where lnr = 'L03')
-  and lnr <> 'L03';
+  	and lnr <> 'L03';
 ````
 
 
  11.
 
- -- Nummern aller Lieferanten, die mehr als einen Artikel geliefert haben
+ --- Nummern aller Lieferanten, die mehr als einen Artikel geliefert haben
 ````sql
 	   select lnr 
    	from lieferung
@@ -2319,40 +2436,40 @@ where b.lnr is null;
  
  12.
 
- -- Nummern und Namen der Artikel, die am selben Ort wie Artikel A03
- -- gelagert werden
+ --- Nummern und Namen der Artikel, die am selben Ort wie Artikel A03
+ --- gelagert werden
 ````sql
 	   select anr, aname
    	from artikel
-   where anr = 'A03'
+   	where anr = 'A03'
 ````
 
 
-   -- besser
+   --- besser
 ````sql
 	   select anr, aname
    	from artikel
-   where astadt = (select astadt
+   	where astadt = (select astadt
                    from artikel
                    where anr = 'A03')
-   and anr <> 'A03'
+   	and anr <> 'A03'
 ````
 
 
  13.
 
- -- durchschnittliche Liefermenge des Artikels A01
+ --- durchschnittliche Liefermenge des Artikels A01
 ````sql
 	   select avg(lmenge)
    	from lieferung
-   where anr = 'A01' 
+   	where anr = 'A01' 
 ````
 
 
  14.
 
- -- Gesamtliefermenge aller Lieferungen des Artikels A01 durch den Lieferanten
- -- L02
+ --- Gesamtliefermenge aller Lieferungen des Artikels A01 durch den Lieferanten
+ --- L02
 ````sql
 	   select sum(lmenge)
    	from lieferung
@@ -2362,7 +2479,7 @@ where b.lnr is null;
   
  15.
 
- -- Lagerorte der Artikel, die von Lieferant L02 geliefert wurden
+ --- Lagerorte der Artikel, die von Lieferant L02 geliefert wurden
 ````sql
 	   select astadt 
    	from artikel a, lieferung b
@@ -2373,8 +2490,8 @@ where b.lnr is null;
 
  16. 
 
- -- Nummern und Namen der Lieferanten, deren Statuswert kleiner als 
- -- der von Lieferant L03 ist
+ --- Nummern und Namen der Lieferanten, deren Statuswert kleiner als 
+ --- der von Lieferant L03 ist
 ````sql
 	   select lnr, lname
    	from lieferant
@@ -2386,8 +2503,8 @@ where b.lnr is null;
 
  17.
  
- -- Nummern von Lieferanten, welche die gleichen Artikel wie 
- -- Lieferant L02 geliefert haben
+ --- Nummern von Lieferanten, welche die gleichen Artikel wie 
+ --- Lieferant L02 geliefert haben
  ````sql
 	   select distinct lnr 
    	from lieferung a
@@ -2404,8 +2521,8 @@ where b.lnr is null;
                                     
  18.
 
- -- die Namen aller Orte die Lager Ort von Artikeln oder Wohnort 
- -- von Lieferanten sind
+ --- die Namen aller Orte die Lager Ort von Artikeln oder Wohnort 
+ --- von Lieferanten sind
 ````sql
 	    select astadt as [Lagerort bzw. Wohnort]
 	    from artikel
@@ -2417,8 +2534,8 @@ where b.lnr is null;
 
  19.
 
- -- Nummern und Namen aller Lieferanten, die nicht den Artikel A05 
- -- geliefert haben
+ --- Nummern und Namen aller Lieferanten, die nicht den Artikel A05 
+ --- geliefert haben
 ````sql
 	    select lnr, lname 
 	    from lieferant 
@@ -2430,8 +2547,8 @@ where b.lnr is null;
                                       
  20.
 
- -- Lieferantennummern und Namen der Lieferanten, die alle Artikel 
- -- geliefert haben
+ --- Lieferantennummern und Namen der Lieferanten, die alle Artikel 
+ --- geliefert haben
 ````sql
 	    select lnr, lname
 	    from lieferant
@@ -2444,9 +2561,9 @@ where b.lnr is null;
 
  21.
 
- -- Nummern, Namen und Wohnort der Lieferanten, die bereits geliefert 
- -- haben und deren Statuswert groesser als
- -- der kleinste Statuswert aller Lieferanten ist
+ --- Nummern, Namen und Wohnort der Lieferanten, die bereits geliefert 
+ --- haben und deren Statuswert groesser als
+ --- der kleinste Statuswert aller Lieferanten ist
 ````sql
 	    select distinct a.lnr, lname, lstadt
 	    from lieferant a, lieferung b
@@ -2457,8 +2574,8 @@ where b.lnr is null;
 
  22.
 
- -- Nummern und Bezeichnung aller Artikel, deren durchschnittliche Liefermenge 
- -- kleiner als die des Artikels A03 ist
+ --- Nummern und Bezeichnung aller Artikel, deren durchschnittliche Liefermenge 
+ --- kleiner als die des Artikels A03 ist
 ````sql
 	    select a.anr, aname
 	    from artikel a, lieferung b
@@ -2472,10 +2589,10 @@ where b.lnr is null;
 
  23.
 
- -- Lieferantennummern, Lieferantenname, Artikelnummer und 
- -- Artikelbezeichnung aller Lieferungen, die seit dem 05.05.1990
- -- von Hamburger Lieferaanten durchgefuehrt
- -- wurden
+ --- Lieferantennummern, Lieferantenname, Artikelnummer und 
+ --- Artikelbezeichnung aller Lieferungen, die seit dem 05.05.1990
+ --- von Hamburger Lieferaanten durchgefuehrt
+ --- wurden
 ````sql
 	    select a.lnr, lname, b.anr, aname
 	    from lieferant a join lieferung b on a.lnr = b.lnr join artikel 
@@ -2487,8 +2604,8 @@ where b.lnr is null;
 
 24. 
  
- -- Anzahl der Lieferungen, die seit dem 05.05.1990 von Hamburger Lieferanten
- -- durchgefuehrt wurden
+ --- Anzahl der Lieferungen, die seit dem 05.05.1990 von Hamburger Lieferanten
+ --- durchgefuehrt wurden
 ````sql
 	    select count(*)
 	    from lieferant a, lieferung b
@@ -2502,7 +2619,7 @@ where b.lnr is null;
 
  25.
 
- -- Ortsnamen, die Wohnort aber nicht Lagerort sind
+ --- Ortsnamen, die Wohnort aber nicht Lagerort sind
 ````sql
 	    select distint lstadt
 	    from lieferant
@@ -2515,7 +2632,7 @@ where b.lnr is null;
 
 26.
 
- -- Ortsnamen, die sowohl Wohnort als auch Lagerort sind
+ --- Ortsnamen, die sowohl Wohnort als auch Lagerort sind
 ````sql
 	    select distint lstadt
 	    from lieferant, artikel
@@ -2537,32 +2654,32 @@ where b.lnr is null;
 
 
 
- -- Daten bearbeiten
+ #### --- Daten bearbeiten
 
- -- Insert
+ --- Insert
 
- -- Einen Datensatz in eine Tabelle einfuegen
+ --- Einen Datensatz in eine Tabelle einfuegen
 
- -- 1. in der Reihenfoolge der Tabellendefinition
+ --- 1. in der Reihenfoolge der Tabellendefinition
 ````sql
 	 insert into lieferant values('L20','Krause',5,'Erfurt');
 	````
 .
 
 
- -- 2. geaenderte Reihenfolge
+ --- 2. geaenderte Reihenfolge
 ````sql
 	 insert into lieferant(lstadt,lnr,status,lname) values('Weimar','L21',5,'Schulze');
 	````
 .
 
 ````sql
-	 insert into lieferant values('Erfurt','L22','Krause',5,) -- Fehler
+	 insert into lieferant values('Erfurt','L22','Krause',5,) --- Fehler
 	````
 .
 
 
- -- 3. unbekannte Werte
+ --- 3. unbekannte Werte
 ````sql
 	 insert into lieferant values('L22','Maria',5,null);
 	````
@@ -2574,10 +2691,10 @@ where b.lnr is null;
 .
 
 
- -- das geht nur wenn fuer alle Spalten die nicht ausgegeben werden, NULL
- -- Marken zugelassen sind
+ --- das geht nur wenn fuer alle Spalten die nicht ausgegeben werden, NULL
+ --- Marken zugelassen sind
 
- -- BLOB laden (binary large objects)
+ --- BLOB laden (binary large objects)
 ````sql
 	 create table medien 
  	(nr int not null,
@@ -2587,17 +2704,17 @@ where b.lnr is null;
 .
 
 
- -- pruefen
+ --- pruefen
 ````sql
 	 select * from medien
-	
+
 insert into medien values
 (1,(select * from openrowset(bulk 'c:\xml\colonel.jpg', single_blob) as c), '.jpg');
 ````
 .
 
 
--- weiter Moeglichkeiten zum Massenladen
+--- weiter Moeglichkeiten zum Massenladen
 ````sql
 	select *
 	into lieferung_hist
@@ -2615,7 +2732,7 @@ insert into lieferung_hist select * from lieferung;
 .
 
 
--- Datenaenderung mitschneiden
+#### --- Datenaenderung mitschneiden
 ````sql
 	create table spion
 	(lfdnr int,
@@ -2634,22 +2751,22 @@ values('L24','Boomer',5,'Weimar')
 .
 
 
--- pruefen mit
+--- pruefen mit
 ````sql
 	select * from spion
 	````
 .
 
 
--- aendern der Daten
+#### --- aendern der Daten
 
--- Daten werden geaendert mit der UPDATE Anweisung wenn
--- ein oder mehrere Spaltenwerte einer oder mehrerer Datensaetze
--- geaendert werden
+--- Daten werden geaendert mit der UPDATE Anweisung wenn
+--- ein oder mehrere Spaltenwerte einer oder mehrerer Datensaetze
+--- geaendert werden
 
--- eine Update - Anweisung ohne where Klausel macht keinen Sinn
+--- eine Update - Anweisung ohne where Klausel macht keinen Sinn
 
--- die Maria zieht nach Gotha
+--- die Maria zieht nach Gotha
 ````sql
 	update lieferant
 	set lstadt = 'Gotha'
@@ -2658,8 +2775,8 @@ where lnr = 'L22';
 .
 
 
--- der Status der Lieferanten die mehr als zwei mal geliefert haben 
--- soll um 5 Punkte erhoeht werden
+--- der Status der Lieferanten die mehr als zwei mal geliefert haben 
+--- soll um 5 Punkte erhoeht werden
 ````sql
 	update lieferant
 	set status = status + 5
@@ -2671,13 +2788,13 @@ where lnr in(select lnr
 .
 
 
--- mit Output arbeiten
+#### --- mit Output arbeiten
 
--- bei einer Update Anweisung werden 2 logische Tabellen gebildet
--- inserted --> mit dem neuen geaenderten Wert
--- deleted --> mit alten ungeaenderten Wert
+--- bei einer Update Anweisung werden 2 logische Tabellen gebildet
+--- inserted --> mit dem neuen geaenderten Wert
+--- deleted --> mit alten ungeaenderten Wert
 
--- der Lieferant L23 zieht nach Urbich (weil Weltstadt)
+--- der Lieferant L23 zieht nach Urbich (weil Weltstadt)
 ````sql
 	update lieferant
 	set lstadt = 'Urbich'
@@ -2689,14 +2806,14 @@ where lnr = 'L23';
 .
 
 
--- pruefen mit
+--- pruefen mit
 ````sql
 	select * from spion
 	````
 .
 
 
--- der Lieferant 23 zieht ploetzlich nach Dittelstedt
+--- der Lieferant 23 zieht ploetzlich nach Dittelstedt
 ````sql
 	update lieferant
 	set lstadt = 'Dittelstedt'
@@ -2708,12 +2825,12 @@ where lnr = 'L23';
 .
 
 
--- DELETE
+#### --- DELETE
 
--- loescht einen oder mehrere Datensaetze
--- sollte nicht ohne where Klausel verwendet werden
+--- loescht einen oder mehrere Datensaetze
+--- sollte nicht ohne where Klausel verwendet werden
 
--- L23 verlaesst fluchtartig die Firma
+--- L23 verlaesst fluchtartig die Firma
 ````sql
 	delete lieferant
 	output 4, getdate(),suser_name(),'Delete',deleted.lnr,null,deleted.lnr
@@ -2723,8 +2840,8 @@ where lnr= 'L23'
 .
 
 
--- Alle Lieferanten ausser L05, die nicht geliefert haben sollen gloescht 
--- werden
+--- Alle Lieferanten ausser L05, die nicht geliefert haben sollen gloescht 
+--- werden
 ````sql
 	delete lieferant
 	where lnr not in (select lnr from lieferung)
@@ -2733,10 +2850,10 @@ and lnr <> 'L05';
 .
 
 
--- Loeschen von Datensaetzen einer Tabelle ohne Protokolierung
+--- Loeschen von Datensaetzen einer Tabelle ohne Protokolierung
 ````sql
 	truncate table lieferung;
-	
+
 select * from lieferant
 ````
 .
@@ -2746,61 +2863,61 @@ select * from lieferant
 
 ### TAG 9:
 
--- Installieren von SQL Server --
+--- Installieren von SQL Server --
 
--- das Produkt ist in der Express, Standart, Developer und Evaluierungsedition
--- erhaeltlich
+--- das Produkt ist in der Express, Standart, Developer und Evaluierungsedition
+--- erhaeltlich
 
--- die express Edition ist kostenfrei
--- es gibt Einschränkungen in der Groesse
--- der Datenbanbkdateien und es gibt
--- keine Moeglichkeit der hohen Verfügbarkeit, der
--- Automatisierung und der Ueberwachung
+--- die express Edition ist kostenfrei
+--- es gibt Einschränkungen in der Groesse
+--- der Datenbanbkdateien und es gibt
+--- keine Moeglichkeit der hohen Verfügbarkeit, der
+--- Automatisierung und der Ueberwachung
 
--- die Evaluierungsversion entspricht der Enterprise Edition
--- alle Funktionen sind verfügbar
--- laeuft in der Regel nach 100 ### TAGen ab
+--- die Evaluierungsversion entspricht der Enterprise Edition
+--- alle Funktionen sind verfügbar
+--- laeuft in der Regel nach 100 ### TAGen ab
 
--- die Developer Edition entspricht der Microsoft
--- Edition, darf aber nur fuer die Entwicklung eingesetzt
--- werden
+--- die Developer Edition entspricht der Microsoft
+--- Edition, darf aber nur fuer die Entwicklung eingesetzt
+--- werden
 
--- die Standard Edition unterstuetzt nicht alle 
--- Funktionen der hohen Verfügbarkeit und des Audit
+--- die Standard Edition unterstuetzt nicht alle 
+--- Funktionen der hohen Verfügbarkeit und des Audit
 
--- SQL Server unterstuetzt RAID 1, RAID 5, RAID 10
+--- SQL Server unterstuetzt RAID 1, RAID 5, RAID 10
 
--- arbeiten mit dezidierten Platten --> Datendateien und
--- Protokolldateien niemals auf ein Device
+--- arbeiten mit dezidierten Platten --> Datendateien und
+--- Protokolldateien niemals auf ein Device
 
--- die Dienstkonten sollten nicht die lokalen (vorinstallierten) sein
--- auch wenn der SQL Server auf einem lokalen (ohne Domäne) Rechner installiert wird 
--- sollten Konten erstellt werden mit einem sicheren Kennwort
+--- die Dienstkonten sollten nicht die lokalen (vorinstallierten) sein
+--- auch wenn der SQL Server auf einem lokalen (ohne Domäne) Rechner installiert wird 
+--- sollten Konten erstellt werden mit einem sicheren Kennwort
 
--- installieren sie nur die Dienste die sie umbedingt benoetigen
+--- installieren sie nur die Dienste die sie umbedingt benoetigen
 
--- wir wollen den SQL Server 2016 Enterprise Edition ohne grafische Oberflaeche installieren
--- es ist jeweils ein Device fuer die Datenbankdateien und die Datenbankprotokolldateien
--- vorhanden, das gleiche gilt fuer die TEMPDB
+--- wir wollen den SQL Server 2016 Enterprise Edition ohne grafische Oberflaeche installieren
+--- es ist jeweils ein Device fuer die Datenbankdateien und die Datenbankprotokolldateien
+--- vorhanden, das gleiche gilt fuer die TEMPDB
 
 use master
 go
 
--- Datenbanken erstellen und Verwalten
+--- Datenbanken erstellen und Verwalten
 
--- Typen
--- Systemdatenbanken (master, msdb, tempdb, model, distribution)
+--- Typen
+--- Systemdatenbanken (master, msdb, tempdb, model, distribution)
 
 
--- Transaktion ist eine unteilbare Einheit die entweder ganz oder
--- ganz garnicht ausgeführt wird
+--- Transaktion ist eine unteilbare Einheit die entweder ganz oder
+--- ganz garnicht ausgeführt wird
 
--- Beispiel: der Herr Beinlich hat für den Herrn Donath
+--- Beispiel: der Herr Beinlich hat für den Herrn Donath
 --				ein Programm geschrieben für das Homebanking
 --				Herr Donath will 5000 Euro von seinem Girokonto
 --				auf sein Sparkonto ueberweisen
 
--- Datenbank erstellen
+--- Datenbank erstellen
 ````sql
 	create database standard;
 	go
@@ -2809,14 +2926,14 @@ go
 
 ````sql
 	exec sp_helpdb standard;
-	
-create table lieferant
-(
-lnr char(3) not null, 
-lname nvarchar(200) not null,
-status tinyint null,
-lstadt nvarchar(200) null
-);
+
+		create table lieferant
+		(
+		lnr char(3) not null, 
+		lname nvarchar(200) not null,
+		status tinyint null,
+		lstadt nvarchar(200) null
+		);
 go
 ````
 .
@@ -2824,13 +2941,13 @@ go
 ````sql
 	create table artikel
 	(
-anr char(3) not null,
-aname varchar(200) not null,
-farbe varchar(10) null,
-gewicht decimal(5,2) null,
-astadt nvarchar(200) not null,
-amenge int not null
-);
+		anr char(3) not null,
+		aname varchar(200) not null,
+		farbe varchar(10) null,
+		gewicht decimal(5,2) null,
+		astadt nvarchar(200) not null,
+		amenge int not null
+	);
 go
 ````
 .
@@ -2838,11 +2955,11 @@ go
 ````sql
 	create table lieferung
 	(
-lnr nchar(3) not null, 
-anr nchar(3) not null, 
-lmenge int not null,
-ldatum datetime not null
-);
+		lnr nchar(3) not null, 
+		anr nchar(3) not null, 
+		lmenge int not null,
+		ldatum datetime not null
+	);
 go
 ````
 .
@@ -2852,33 +2969,33 @@ go
 ````sql
 	insert into dbo.lieferant values('L01', 'Schmidt', 20, 'Hamburg');
 	insert into dbo.lieferant values('L02', 'Jonas', 10, 'Ludwigshafen');
-insert into dbo.lieferant values('L03', 'Blank', 30, 'Ludwigshafen');
-insert into dbo.lieferant values('L04', 'Clark', 20, 'Hamburg');
-insert into dbo.lieferant values('L05', 'Adam', 30, 'Aachen');
+	insert into dbo.lieferant values('L03', 'Blank', 30, 'Ludwigshafen');
+	insert into dbo.lieferant values('L04', 'Clark', 20, 'Hamburg');
+	insert into dbo.lieferant values('L05', 'Adam', 30, 'Aachen');
 
 
 
-insert into dbo.artikel values('A01', 'Mutter', 'rot', 12, 'Hamburg', 800);
-insert into dbo.artikel values('A02', 'Bolzen', 'grün', 17, 'Ludwigshafen', 1200);
-insert into dbo.artikel values('A03', 'Schraube', 'blau', 17, 'Mannheim', 400);
-insert into dbo.artikel values('A04', 'Schraube', 'rot', 14, 'Hamburg', 900);
-insert into dbo.artikel values('A05', 'Nockenwelle', 'blau', 12, 'Ludwigshafen', 1300);
-insert into dbo.artikel values('A06', 'Zahnrad', 'rot', 19, 'Hamburg', 500);
+	insert into dbo.artikel values('A01', 'Mutter', 'rot', 12, 'Hamburg', 800);
+	insert into dbo.artikel values('A02', 'Bolzen', 'grün', 17, 'Ludwigshafen', 1200);
+	insert into dbo.artikel values('A03', 'Schraube', 'blau', 17, 'Mannheim', 400);
+	insert into dbo.artikel values('A04', 'Schraube', 'rot', 14, 'Hamburg', 900);
+	insert into dbo.artikel values('A05', 'Nockenwelle', 'blau', 12, 'Ludwigshafen', 1300);
+	insert into dbo.artikel values('A06', 'Zahnrad', 'rot', 19, 'Hamburg', 500);
 
 
 
-insert into dbo.lieferung values('L01', 'A01', 300, '18.05.90');
-insert into dbo.lieferung values('L01', 'A02', 200, '13.07.90');
-insert into dbo.lieferung values('L01', 'A03', 400, '01.01.90');
-insert into dbo.lieferung values('L01', 'A04', 200, '25.07.90');
-insert into dbo.lieferung values('L01', 'A05', 100, '01.08.90');
-insert into dbo.lieferung values('L01', 'A06', 100, '23.07.90');
-insert into dbo.lieferung values('L02', 'A01', 300, '02.08.90');
-insert into dbo.lieferung values('L02', 'A02', 400, '05.08.90');
-insert into dbo.lieferung values('L03', 'A02', 200, '06.08.90');
-insert into dbo.lieferung values('L04', 'A02', 200, '09.08.90');
-insert into dbo.lieferung values('L04', 'A04', 300, '20.08.90');
-insert into dbo.lieferung values('L04', 'A05', 400, '21.08.90');
+	insert into dbo.lieferung values('L01', 'A01', 300, '18.05.90');
+	insert into dbo.lieferung values('L01', 'A02', 200, '13.07.90');
+	insert into dbo.lieferung values('L01', 'A03', 400, '01.01.90');
+	insert into dbo.lieferung values('L01', 'A04', 200, '25.07.90');
+	insert into dbo.lieferung values('L01', 'A05', 100, '01.08.90');
+	insert into dbo.lieferung values('L01', 'A06', 100, '23.07.90');
+	insert into dbo.lieferung values('L02', 'A01', 300, '02.08.90');
+	insert into dbo.lieferung values('L02', 'A02', 400, '05.08.90');
+	insert into dbo.lieferung values('L03', 'A02', 200, '06.08.90');
+	insert into dbo.lieferung values('L04', 'A02', 200, '09.08.90');
+	insert into dbo.lieferung values('L04', 'A04', 300, '20.08.90');
+	insert into dbo.lieferung values('L04', 'A05', 400, '21.08.90');
 
 ````
 .
@@ -2887,104 +3004,104 @@ insert into dbo.lieferung values('L04', 'A05', 400, '21.08.90');
 ````sql
 	select * from lieferant
 	select * from lieferung
-select * from artikel
+	select * from artikel
 ````
 .
 
 
 -----------------------------------------------------------------------
 
--- Einschränkungen für Tabellen erstellen
--- primary key, unique, foreign key, default, check
--- sie dienen dazu Integritätsbedingungen innerhalb der
--- Datenbank durchzusetzen
--- diese Einschränkungen koennen für Tabellen mit und ohne DS erstellt
--- werden
--- sind in den Tabellen bereits Datensaetze enthalten, dann müssen sie
--- die Einschränkung erfüllen 
+--- Einschränkungen für Tabellen erstellen
+--- primary key, unique, foreign key, default, check
+--- sie dienen dazu Integritätsbedingungen innerhalb der
+--- Datenbank durchzusetzen
+--- diese Einschränkungen koennen für Tabellen mit und ohne DS erstellt
+--- werden
+--- sind in den Tabellen bereits Datensaetze enthalten, dann müssen sie
+--- die Einschränkung erfüllen 
 
--- einige Einschraenkungen (primary key, unique) erzeugen Indizes
+--- einige Einschraenkungen (primary key, unique) erzeugen Indizes
 
--- Primaerschluessel
+#### --- Primaerschluessel
 ````sql
 	alter table lieferant add constraint lnr_pk primary key(lnr);
-	````
+````
 .
 
  
--- pruefen mit
+--- pruefen mit
 ````sql
 	exec sp_help 'lieferant'
 	````
 .
 
 
--- standardmaessig erzeugt der Primaerschluessel einen clustered 
--- (gruppierten) Index
+--- standardmaessig erzeugt der Primaerschluessel einen clustered 
+--- (gruppierten) Index
 
--- Test
+--- Test
 ````sql
-	insert into lieferant values('L01','Kummer',5,'Erfurt'); -- L01 vorhanden
-	insert into lieferant values('L06','Kummer',5,'Erfurt',0); -- geht
+	insert into lieferant values('L01','Kummer',5,'Erfurt'); --- L01 vorhanden
+	insert into lieferant values('L06','Kummer',5,'Erfurt',0); --- geht
 ````
 .
 
 
--- Unique (Vorbereitung)
+#### --- Unique (Vorbereitung)
 ````sql
 	alter table lieferant add vers_nr varchar(20) null;
-	
-update lieferant set vers_nr = 'ABC-12345-CC' where lnr = 'L01';
-update lieferant set vers_nr = 'DEF-12345-CC' where lnr = 'L02';
-update lieferant set vers_nr = 'GHI-12345-CC' where lnr = 'L03';
-update lieferant set vers_nr = 'JKL-12345-CC' where lnr = 'L04';
-update lieferant set vers_nr = 'MNO-12345-CC' where lnr = 'L05';
-update lieferant set vers_nr = 'MNO-12345-CC' where lnr = 'L06';
+
+		update lieferant set vers_nr = 'ABC-12345-CC' where lnr = 'L01';
+		update lieferant set vers_nr = 'DEF-12345-CC' where lnr = 'L02';
+		update lieferant set vers_nr = 'GHI-12345-CC' where lnr = 'L03';
+		update lieferant set vers_nr = 'JKL-12345-CC' where lnr = 'L04';
+		update lieferant set vers_nr = 'MNO-12345-CC' where lnr = 'L05';
+		update lieferant set vers_nr = 'MNO-12345-CC' where lnr = 'L06';
 
 alter table lieferant add consraint versnr_unq unique(vers_nr)
 ````
 .
 
 
--- Test 
+--- Test 
 ````sql
-	insert into lieferant values ('L07','Jach',5,'Erfurt','ABC-12345-CC') -- Fehler
-	insert into lieferant values ('L07','Jach',5,'Erfurt','QRS-12345-CC'); -- geht
+	insert into lieferant values ('L07','Jach',5,'Erfurt','ABC-12345-CC') --- Fehler
+	insert into lieferant values ('L07','Jach',5,'Erfurt','QRS-12345-CC'); --- geht
 ````
 .
 
 
--- fuer eine Tabelle kann es mehr als eine Unique Einschraenkung geben
--- Unique laesst null Marken zu ( nur eine )
--- Unique erstellt standardmaessig einen nonclustered Index
+--- fuer eine Tabelle kann es mehr als eine Unique Einschraenkung geben
+--- Unique laesst null Marken zu ( nur eine )
+--- Unique erstellt standardmaessig einen nonclustered Index
 
 -------
 
--- Spalte vers_nr loeschen
--- 1. das Constraint loeschen
+--- Spalte vers_nr loeschen
+--- 1. das Constraint loeschen
 ````sql
 	alter table lieferant drop constraint versnr_unq;
 	````
 .
 
 
--- 2. Tabellenspalten loeschen
+--- 2. Tabellenspalten loeschen
 ````sql
 	alter table lieferant drop drop column vers_nr;
 	````
 .
 
 
--- Default
--- wenn fuer eine Spalte kein Wert angegeben wird soll ein Defaultwert gelten.
--- auf Primaerschluesselspalten werden keine Default erstellt
+--- Default
+--- wenn fuer eine Spalte kein Wert angegeben wird soll ein Defaultwert gelten.
+--- auf Primaerschluesselspalten werden keine Default erstellt
 ````sql
 	alter table lieferant add constraint lstadt_def default 'Gotha' for lstadt;
 	````
 .
 
 
--- test
+--- test
 ````sql
 	insert into lieferant values ('L06','Kulesch',5, default);
 	insert into lieferant (lnr,lname,status) values ('L08','Schoeppach',5);
@@ -2999,42 +3116,42 @@ alter table lieferant add consraint versnr_unq unique(vers_nr)
 .
 
 
--- wenn eine NULL Marke aufgenommen werden muss, dann muessen sie diese
--- explizit angegeben werden
+--- wenn eine NULL Marke aufgenommen werden muss, dann muessen sie diese
+--- explizit angegeben werden
 ````sql
 	insert into lieferant values ('L09','Warnecke',5, null);
 	````
 .
 
 
--- Check Einschränkung
+--- Check Einschränkung
 
--- mit dieser Einschraenkung kenne gültige Werte fuer eine Tabellenspalte 
--- festgelegt werden
--- pro Spalte kann es keine, eine oder mehrere Check Einschraenkungen geben
+--- mit dieser Einschraenkung kenne gültige Werte fuer eine Tabellenspalte 
+--- festgelegt werden
+--- pro Spalte kann es keine, eine oder mehrere Check Einschraenkungen geben
 --		      sie sollten sich nicht gegenseitig blockieren oder aufheben
--- Check Einschraenkungen koennen sich auch auf andere Spalten der Tabelle 
--- beziehen Beispiel: im Datensatz befindet sich ein Wert 'Name' und 'Vorname'
+--- Check Einschraenkungen koennen sich auch auf andere Spalten der Tabelle 
+--- beziehen Beispiel: im Datensatz befindet sich ein Wert 'Name' und 'Vorname'
 --		      es soll sichergestellt werden, dass wenn nur der Vorname 
---                    angegeben wurde, das Einfuegen des DS abgewiesen wird
+---                    angegeben wurde, das Einfuegen des DS abgewiesen wird
 
 
--- Lieferantennamen sollen mit einem Buchstaben beginnen
+--- Lieferantennamen sollen mit einem Buchstaben beginnen
 ````sql
 	alter table lieferant add constraint lname_chk check(lname like '[A-Z]%');
-	
-insert into lieferant values ('L10','8Sell',5, Jena); -- Fehler Name beginnt mit Zahl
+
+insert into lieferant values ('L10','8Sell',5, Jena); --- Fehler Name beginnt mit Zahl
 
 insert into lieferant values ('L10','Sell',15, default);
 ````
 .
 
 
--- der Statuswert darf nur zwischen 0 und 100 liegen
+--- der Statuswert darf nur zwischen 0 und 100 liegen
 ````sql
 	 alter table lieferant add constraint status_chk check(status between 0 and 100);
-	
-insert into lieferant values ('L11','Sell',105,'Erfurt');  -- Fehler
+
+insert into lieferant values ('L11','Sell',105,'Erfurt');  --- Fehler
 
 insert into lieferant values ('L11','Sell',99,'Erfurt');
 ````
@@ -3042,7 +3159,7 @@ insert into lieferant values ('L11','Sell',99,'Erfurt');
 
 
 
--- Fremdschluessel ( foreign key)
+--- Fremdschluessel ( foreign key)
 ````sql
 	alter table lieferung add constraint lnr_fk foreign key(lnr) 
 						  	references lieferant(lnr)
@@ -3054,10 +3171,10 @@ insert into lieferant values ('L11','Sell',99,'Erfurt');
 	alter table lieferung add constraint anr_fk foreign key(anr) 
 						  	references artikel(anr);  
                                                  
-                                                  -- erzeugt einen Fehler weil
-						  -- die Tabelle Artikel
-						  -- noch keinen Primaerschluessel
-						  -- besitzt
+                                                  --- erzeugt einen Fehler weil
+						  --- die Tabelle Artikel
+						  --- noch keinen Primaerschluessel
+						  --- besitzt
 ````
 .
 
@@ -3071,22 +3188,22 @@ insert into lieferant values ('L11','Sell',99,'Erfurt');
 	alter table lieferung add constraint anr_fk foreign key(anr)
 					  	references artikel(anr);	    
                                           
-                                                  -- jetzt sollte es gehen
+                                                  --- jetzt sollte es gehen
 ````
 .
 
 
 
--- Primaerschluessel fuer die Tabelle Lieferung
+--- Primaerschluessel fuer die Tabelle Lieferung
 
--- zusammengesetzter Primaerschluessel aus dem Spalten lnr, anr, ldatum
+--- zusammengesetzter Primaerschluessel aus dem Spalten lnr, anr, ldatum
 ````sql
 	alter table lieferung add constraint lief_pk primary key(lnr,anr,ldatum);
 	````
 .
 
 
---  Beispiel fuer referentielle Integritaet (hat was mit dem foreign key zu tun)
+---  Beispiel fuer referentielle Integritaet (hat was mit dem foreign key zu tun)
 ````sql
 	insert into lieferung values('L44','A02',500, GETDATE());
 	````
@@ -3096,7 +3213,7 @@ insert into lieferant values ('L11','Sell',99,'Erfurt');
 --	Fehler wegen referentieller Integritaet, den Lieferanten L44
 --	gibt es nicht !!!
 
--- Opertationregel kaskadierndes aendern zwischen Lieferant und Lieferung
+--- Opertationregel kaskadierndes aendern zwischen Lieferant und Lieferung
 ````sql
 	select * from lieferant as a join lieferung as b on a.lnr = b.lnr
 	where a.lnr = 'L04';
@@ -3114,16 +3231,16 @@ insert into lieferant values ('L11','Sell',99,'Erfurt');
                                 
 ````
 .
--- leer weil L04 nicht mehr vorhanden
+--- leer weil L04 nicht mehr vorhanden
 ````sql
 	select * from lieferant as a join lieferung as b on a.lnr = b.lnr
 	where a.lnr = 'L06';		
                                 
 ````
 .
--- dem Liefranten wurde die lnr
-				-- geaendert und seine Lieferungen wurden
-				-- ihm wieder zugeordnet
+--- dem Liefranten wurde die lnr
+				--- geaendert und seine Lieferungen wurden
+				--- ihm wieder zugeordnet
 
 ````sql
 	exec sp_help 'lieferant'
@@ -3150,7 +3267,7 @@ where lnr = 'L11'
 
 ### TAG 12:
 
--- Dateigruppen erstellen
+#### --- Dateigruppen erstellen
 ````sql
 	use master
 	go
@@ -3158,7 +3275,7 @@ where lnr = 'L11'
 .
 
 
--- 1. Dateigruppen (Aktiv, Passiv und Indexe) erstellen
+--- 1. Dateigruppen (Aktiv, Passiv und Indexe) erstellen
 ````sql
 	alter database standard add filegroup passiv;
 	go
@@ -3178,7 +3295,7 @@ where lnr = 'L11'
 .
 
 
--- 2. Datenbankdateien erstellen und den entsprechenden Dateigruppen 
+--- 2. Datenbankdateien erstellen und den entsprechenden Dateigruppen 
 --	  zuordnen.
 ````sql
 	alter database standard 
@@ -3211,10 +3328,10 @@ where lnr = 'L11'
 .
 
 
--- Damit Datenbankbenutzer die berechtigt sind in der Datenbank
--- Tabellen, Sichten, Prozeduren oder Funktionen zu erstellen, diese nicht
--- aus Versehen in der Dateigruppe PRIMARY erstellen, machen wir
--- jetzt die Dateigruppe Passiv zur Default Dateigruppe
+--- Damit Datenbankbenutzer die berechtigt sind in der Datenbank
+--- Tabellen, Sichten, Prozeduren oder Funktionen zu erstellen, diese nicht
+--- aus Versehen in der Dateigruppe PRIMARY erstellen, machen wir
+--- jetzt die Dateigruppe Passiv zur Default Dateigruppe
 ````sql
 	alter database standard modify filegroup passiv default;
 	go
@@ -3222,11 +3339,11 @@ where lnr = 'L11'
 .
 
 
--- wunsch von Herrn Ruhland
--- Maxsize von der Datei in PRIMARY und des Transaktionsprotokol
--- aendern
+--- wunsch von Herrn Ruhland
+--- Maxsize von der Datei in PRIMARY und des Transaktionsprotokol
+--- aendern
 
--- pruefen mit
+--- pruefen mit
 ````sql
 	exec sp_helpdb standard;
 	````
@@ -3249,12 +3366,12 @@ go
 
 
 
--- Tabelle in die entsprechende Dateigruppe verschieben
--- Tabellen koennen nur in eine andere Dateigruppe verschoben werden in dem
--- der gruppierte Index (Primaerschluessel) geloescht wird und sofort wieder
--- neu erstellt wird und ihm der Dateigruppenname zugewiesen wird
+--- Tabelle in die entsprechende Dateigruppe verschieben
+--- Tabellen koennen nur in eine andere Dateigruppe verschoben werden in dem
+--- der gruppierte Index (Primaerschluessel) geloescht wird und sofort wieder
+--- neu erstellt wird und ihm der Dateigruppenname zugewiesen wird
 
--- die Tabellen Lieferant und Artikel nach 'Passiv' verschieben
+--- die Tabellen Lieferant und Artikel nach 'Passiv' verschieben
 ````sql
 	use standard
 	go
@@ -3263,7 +3380,7 @@ go
 
 
 
--- Primaerschluessel loeschen
+#### --- Primaerschluessel loeschen
 ````sql
 	alter table lieferung drop constraint lnr_fk;
 	````
@@ -3275,7 +3392,7 @@ go
 .
 
 
--- 1. Tabelle Lieferant
+--- 1. Tabelle Lieferant
 ````sql
 	alter table lieferant drop constraint lnr_pk;
 	go
@@ -3289,7 +3406,7 @@ go
 .
 
 
--- 2. Tabelle Artikel
+--- 2. Tabelle Artikel
 ````sql
 	alter table artikel drop constraint anr_pk;
 	go
@@ -3298,12 +3415,12 @@ go
 
 ````sql
 	alter table artikel add constraint anr_pk primary key(anr) on passiv;
-	
+
 ````
 .
 
 
--- 3. Tabelle Lieferung
+--- 3. Tabelle Lieferung
 ````sql
 	alter table lieferung drop constraint lief_pk;
 	go
@@ -3316,7 +3433,7 @@ go
 ````
 .
 
--- Fremdschluessel
+#### --- Fremdschluessel
 ````sql
 	alter table lieferung add constraint lnr_fk foreign key(lnr)
 				references lieferant(lnr) on update cascade;
@@ -3405,7 +3522,7 @@ go
 
 
 
--- Stammdatensaetze Orte fuer die Abteilungen
+--- Stammdatensaetze Orte fuer die Abteilungen
 ````sql
 	insert into orte values(1,'98527','Suhl');
 	insert into orte values(2,'99082','Erfurt');
@@ -3523,33 +3640,33 @@ go
 /* Datenbankobjekte um Abfragen effektiver einzusetzen und
 schneller zu machen
 
--Sichten
--Indizes
--Transact SQL Stapelprogramme
--Cursor
--gespeicherte Prozeduren
--benutzerdefinierte Funktion
--Trigger
+ - Sichten
+ - Indizes
+ - Transact SQL Stapelprogramme
+ - Cursor
+ - gespeicherte Prozeduren
+ - benutzerdefinierte Funktion
+ - Trigger
 
 */
 
--- Views (gespeicherte Abfragen)
--- Vorteil die Abfrage wird bei der ersten Ausführung kompiliert
+#### --- Views (gespeicherte Abfragen)
+--- Vorteil die Abfrage wird bei der ersten Ausführung kompiliert
 --		und der Ausfuehrungsplan in den Prozerdurcache gelegt.
 --		jeder weiter Aufruf der Sicht verwendet den bereits kompilierten
 --		Ausfuehrungsplan
 
--- eine Sicht ermöglicht eine horizontale und vertikale Partionierung von
--- Tabelleninfos
--- Beispiel: Der Meister des Meisterbereichs 2 soll nur die Mitarbeiter
+--- eine Sicht ermöglicht eine horizontale und vertikale Partionierung von
+--- Tabelleninfos
+--- Beispiel: Der Meister des Meisterbereichs 2 soll nur die Mitarbeiter
 --		angezeigt bekommen die in seinem Meisterbereich arbeiten (horizontal)
 --		aber ohne die Spalte 'Gehalt' (vertikal)
 
--- Sichten werden mit create view .. erstellt, mit alter view ... geaendert
--- und mit drop view .. geloescht
+--- Sichten werden mit create view .. erstellt, mit alter view ... geaendert
+--- und mit drop view .. geloescht
 
--- die create view - Anweisung darf nicht mit anderen SQL Anweisungen in einem
--- Stapel stehen! mit 'go' seperieren
+--- die create view - Anweisung darf nicht mit anderen SQL Anweisungen in einem
+--- Stapel stehen! mit 'go' seperieren
 ````sql
 	create view hamb_lief
 	as
@@ -3561,7 +3678,7 @@ go
 .
 
 
--- wo werden Sichten gespeichert?
+--- wo werden Sichten gespeichert?
 ````sql
 	select * from sys.objects where object_id = object_id('hamb_lief');
 	select * from sys.views where object_id = object_id('hamb_lief');
@@ -3569,24 +3686,25 @@ go
 ````
 .
 
--- wo liegt die Sichtdefinition
+--- wo liegt die Sichtdefinition
 ````sql
 	select * from sys.sql_modules where object_id = object_id('hamb_lief');
-	
+
 ````
 .
 
---oder
+--- oder
+
 ````sql
 	exec sp_helptext 'hamb_lief';
-	
+
 select * from hamb_lief;
 go
 ````
 .
 
 
--- view definition verschluesseln
+--- view definition verschluesseln
 ````sql
 	alter view hamb_lief
 	with encryption
@@ -3602,11 +3720,11 @@ go
  --pruefen mit
 ````sql
 	exec sp_helptext 'hamb_lief';
-	
+
 ````
 .
 
--- rueckgaengig mit
+--- rueckgaengig mit
 ````sql
 	alter view hamb_lief
 	as
@@ -3618,7 +3736,7 @@ go
 .
 
 
---  Sichten mit Join
+---  Sichten mit Join
 ````sql
 	create view lieflief
 	as
@@ -3635,15 +3753,15 @@ go
 .
 
 , 
--- Datenaenderung ueber Sichten (Insert, Update, Delete)
+--- Datenaenderung ueber Sichten (Insert, Update, Delete)
 
--- Datenaenderungen auf Sichten die sich auf mehr als eine Tabelle beziehen
--- sind nicht moeglich oder nur mit INSTEAD - Trigger moeglich
+--- Datenaenderungen auf Sichten die sich auf mehr als eine Tabelle beziehen
+--- sind nicht moeglich oder nur mit INSTEAD - Trigger moeglich
 
 --Insert
 ````sql
 	insert into hamb_lief values('L30','Kirsten','Hamburg');
-	
+
 select * from hamb_lief;
 select * from lieferant;
 
@@ -3656,7 +3774,7 @@ select * from lieferant;
 .
 
 
--- Sicht aendern with check option
+--- Sicht aendern with check option
 ````sql
 	alter view hamb_lief
 	as
@@ -3672,7 +3790,7 @@ go
 
 	insert into hamb_lief values('L32','Lauch','Weimar');  --Fehler
 
-insert into hamb_lief values('L32','Lauch','Hamburg'); -- Geht
+insert into hamb_lief values('L32','Lauch','Hamburg'); --- Geht
 
 ````
 .
@@ -3692,25 +3810,25 @@ go
 
 	select * from hamb_lief1;
 
-insert into hamb_lief1 values('L33','Maria','Hamburg');  -- geht nicht
+insert into hamb_lief1 values('L33','Maria','Hamburg');  --- geht nicht
 
-insert into hamb_lief1 values('L33','Maria');		 -- geht nicht
+insert into hamb_lief1 values('L33','Maria');		 --- geht nicht
 ````
 .
 
 
--- Update
+--- Update
 ````sql
 	update hamb_lief
 	set lstadt = 'Erfurt'
-where lnr = 'L32';				-- Fehler wegen der with check option
+where lnr = 'L32';				--- Fehler wegen der with check option
 
 ````
 .
 ````sql
 	update hamb_lief
 	set lname = 'Kaltduscher'
-where lnr = 'L32';				-- geht
+where lnr = 'L32';				--- geht
 
 
 select * from hamb_lief;
@@ -3723,19 +3841,19 @@ was wurde in der Datenbank gemacht
 ````sql
 	update lieferant
 	set lname = 'Kaltduscher'
-where lnr = 'L32'				-- kommt von Update
-and lstadt = 'Hamburg';			        -- kommt von der Sicht
+where lnr = 'L32'				--- kommt von Update
+and lstadt = 'Hamburg';			        --- kommt von der Sicht
 ````
 .
 
 */
 
--- DELETE
+#### --- DELETE
 
--- niemals ohne where - Klausel  
--- weil
--- delete hamb_lief;			        -- loescht alle Hamburger
---						-- Lieferanten
+--- niemals ohne where - Klausel  
+--- weil
+--- delete hamb_lief;			        --- loescht alle Hamburger
+--						--- Lieferanten
 ````sql
 	delete hamb_lief
 	from hamb_lief as a left join lieferung as b on a.lnr = b.lnr
@@ -3744,7 +3862,7 @@ where b.lnr is null;
 .
 
 
--- loescht alle Hamburger Lieferanten ohne Lieferung
+--- loescht alle Hamburger Lieferanten ohne Lieferung
 ````sql
 	select * from Hamb_lief;
 	````
@@ -3799,11 +3917,11 @@ go
 
 ````sql
 	select * from sys.indexes where object_id = object_id('indtest)';
-	
+
 ````
 .
 
--- Fragmentierungsgrad des Haufens
+--- Fragmentierungsgrad des Haufens
 ````sql
 	select * from
 	sys.dm_db_index_physical_stats(db_id(),object_id('indtest'),null,null,null);
@@ -3812,26 +3930,26 @@ go
 .
 
 
--- eine Tabelle kann maxsimal 1000 Indizes besitzen
--- 1 gruppierten Index und 999 nicht gruppierte Indizes
+--- eine Tabelle kann maxsimal 1000 Indizes besitzen
+--- 1 gruppierten Index und 999 nicht gruppierte Indizes
 
--- Besitzt eine Tabelle keinen gruppierten Index bleiben die Daten in der
--- Speicherorganisationsform 'Haufen'
+--- Besitzt eine Tabelle keinen gruppierten Index bleiben die Daten in der
+--- Speicherorganisationsform 'Haufen'
 ````sql
 	create index vname_ind on indtest(vname);
-	
+
 ````
 .
 
 
--- welche Indizes gibt es fuer die Tabelle
+--- welche Indizes gibt es fuer die Tabelle
 ````sql
 	select * from sys.indexes where object_id = object_id('indtest)';
-	
+
 ````
 .
 
--- Fragmentierungsgrad des Haufens
+#### --- Fragmentierungsgrad des Haufens
 ````sql
 	select * from
 	sys.dm_db_index_physical_stats(db_id(),object_id('indtest'),null,null,null);
@@ -3844,10 +3962,10 @@ go
 .
 
 
--- sobald ein gruppierter Index erstellt wird, wird die physische Reihenfolge
--- der Datensaetze entsprechend der indizierten Reihenfolge geaendert
+--- sobald ein gruppierter Index erstellt wird, wird die physische Reihenfolge
+--- der Datensaetze entsprechend der indizierten Reihenfolge geaendert
 
--- Primaerschluessel fuer die Tabelle Indtest
+--- Primaerschluessel fuer die Tabelle Indtest
 ````sql
 	alter table indtest add constraint id_pk primary key(id);
 	````
@@ -3866,14 +3984,14 @@ go
 
 ----
 
--- welche Indizes gibt es fuer die Tabelle
+--- welche Indizes gibt es fuer die Tabelle
 ````sql
 	select * from sys.indexes where object_id = object_id('indtest)';
 	````
 .
 
 
--- Fragmentierungsgrad des Haufens
+--- Fragmentierungsgrad des Haufens
 ````sql
 	select * from
 	sys.dm_db_index_physical_stats(db_id(),object_id('indtest'),null,null,null);
@@ -3890,7 +4008,7 @@ where aname = 'Schraube' and astadt like '%m%';
 .
 
 
--- zusammengesetzter Index
+--- zusammengesetzter Index
 ````sql
 	create index aname_astadt_ind on artikel(aname,astadt);
 	````
@@ -3904,17 +4022,17 @@ where farbe = 'rot';
 .
 
 
--- abgedeckter Index (der Index deckt die Abfgrage vollstaendig ab)
+--- abgedeckter Index (der Index deckt die Abfgrage vollstaendig ab)
 ````sql
 	create index farbe_art on artikel(farbe, aname, astadt, amenge);
 	````
 .
 
 
--- Index mit eingeschlossenen Spalten
--- wird verwendet wenn die Anzahl der Spalten des zusammengesetzten Index
--- 16 Spalten überschreitet und/oder die Laenge der Spaltenwerte groesser
--- 900 Byte ist.
+--- Index mit eingeschlossenen Spalten
+--- wird verwendet wenn die Anzahl der Spalten des zusammengesetzten Index
+--- 16 Spalten überschreitet und/oder die Laenge der Spaltenwerte groesser
+--- 900 Byte ist.
 ````sql
 	create index farbe_art_inc on artikel(farbe) include (aname, astadt, amenge);
 	````
@@ -3928,30 +4046,30 @@ where farbe = 'rot';
 .
 
 
--- damit ist der zusammengesetzte Index ueberfluessig und kann geloescht werden
+--- damit ist der zusammengesetzte Index ueberfluessig und kann geloescht werden
 ````sql
 	drop index artikel.farbe_art;
-	
+
 select * from artikel
 ````
 .
 
 
--- Extras SQL Server Profiler 
+#### --- Extras SQL Server Profiler 
 
--- Indexfragmentierung
--- die Fragmentierung von Indizes stellen Sie mit der dynamischen Verwaltungs-
--- funktion sys.de_db_indexphysical_stats() fest
--- wichig dabei ist die Spalte avg_fragmentation_in_percent
+--- Indexfragmentierung
+--- die Fragmentierung von Indizes stellen Sie mit der dynamischen Verwaltungs-
+--- funktion sys.de_db_indexphysical_stats() fest
+--- wichig dabei ist die Spalte avg_fragmentation_in_percent
 
--- bei Fragmetation bis 30 % wird der Index neu Organisiert
+--- bei Fragmetation bis 30 % wird der Index neu Organisiert
 ````sql
 	alter index farbe_art_inc on artikel reorganize;
 	````
 .
 
 
--- bei Fragmentation ueber 30 % wird der Index neu gebildet
+--- bei Fragmentation ueber 30 % wird der Index neu gebildet
 ````sql
 	alter index farbe_art_inc on artikel rebuild;
 	````
@@ -3966,18 +4084,18 @@ select * from artikel
 .
 
 
--- Programmieren mit Tranact "SQL"
+#### --- Programmieren mit Tranact "SQL"
 
--- Begriffe:
--- Script -- ist eine Datei welche mit der Endung .sql abgespeichert wird
--- Stapel .. ein Script besteht aus einem oder mehrern Stapel
+--- Begriffe:
+--- Script --- ist eine Datei welche mit der Endung .sql abgespeichert wird
+--- Stapel .. ein Script besteht aus einem oder mehrern Stapel
 --		ein Stapel endet mit einem Stapelzeichen "go"
 --		eine Variable welche in einem Stapel deklariert wurde kann in
---		einem anderen Stapel nicht verwendet werden -- sie ist nicht bekannt
+--		einem anderen Stapel nicht verwendet werden --- sie ist nicht bekannt
 
--- Anweisungsbloecke
--- werden verwendet in einer WHILE - Schleife, im IF und ELSE Zweig einer
--- IF/ELSE - Anweisung und im Body von benutzerdefinierten Funktionen
+--- Anweisungsbloecke
+--- werden verwendet in einer WHILE - Schleife, im IF und ELSE Zweig einer
+--- IF/ELSE - Anweisung und im Body von benutzerdefinierten Funktionen
 ````sql
 	begin
 		select @@version;
@@ -3987,9 +4105,9 @@ end;
 .
 
 
--- Meldungen
--- einfache Meldungen mit PRINT
--- Print gibt nur Zeichenfolgen zurück
+--- Meldungen
+--- einfache Meldungen mit PRINT
+--- Print gibt nur Zeichenfolgen zurück
 ````sql
 	print 'Heute ist' + datename(dw,getdate()) + 
 	  	'der' + convert(char(10),getdate(),104)
@@ -3997,12 +4115,12 @@ end;
 .
 
 
--- Meldungen mit raiserror
--- mit raiserror koennen benutzerdefinierte Meldungen, Systemmeldungen
--- und AdHoc - Meldungen verwendet werden
+--- Meldungen mit raiserror
+--- mit raiserror koennen benutzerdefinierte Meldungen, Systemmeldungen
+--- und AdHoc - Meldungen verwendet werden
 
--- Systemmeldungen und benutzerdefinierte Meldungen werden in sys.messages
--- gespeichert
+--- Systemmeldungen und benutzerdefinierte Meldungen werden in sys.messages
+--- gespeichert
 ````sql
 	select * from sys.messages where language_id = 1031;
 	````
@@ -4010,15 +4128,15 @@ end;
 
 
 
--- benutzerdefinierte Meldungen beginnen bei der messages_id > 50000
--- Raiserrormeldungen besitzen einen Schweregrad
---  1 - 10 -- einfache Fehler die vom Benutzer behoben werden
--- 11 - 18 -- komplexere Fehler die teilweise vom Benutzer behoben werden koennen
--- 19 - 25 -- schwerwiegende Fehler des Systems, koennen nur von sysadmins behoben
-	   -- werden und muessen ins Ereignisprotokoll von Windows geschrieben werden
--- 20 - 25 -- trennt den Client vom Server
+--- benutzerdefinierte Meldungen beginnen bei der messages_id > 50000
+--- Raiserrormeldungen besitzen einen Schweregrad
+---  1 - 10 --- einfache Fehler die vom Benutzer behoben werden
+--- 11 - 18 --- komplexere Fehler die teilweise vom Benutzer behoben werden koennen
+--- 19 - 25 --- schwerwiegende Fehler des Systems, koennen nur von sysadmins behoben
+	   --- werden und muessen ins Ereignisprotokoll von Windows geschrieben werden
+--- 20 - 25 --- trennt den Client vom Server
 
--- Meldung ertellen
+--- Meldung ertellen
 ````sql
 	exec sp_addmessage 600000, 10,'Cant deleted!','us_english', 'false';
 	exec sp_addmessage 600000, 10,'Kann nicht geloescht werden!','german', 'false';
@@ -4026,27 +4144,27 @@ end;
 ````
 .
 
--- Meldung verwenden
+--- Meldung verwenden
 ````sql
-	raiserror(600000,10,1);				-- Meldung
-	raiserror(600000,13,1);				-- Fehler 600000
-raiserror(600000,21,1) with log;	-- schwerer Fehler
+	raiserror(600000,10,1);				--- Meldung
+	raiserror(600000,13,1);				--- Fehler 600000
+raiserror(600000,21,1) with log;	--- schwerer Fehler
 ````
 .
 
 
--- sie koennen Raiseerrror mit jedem Schweregrad ins Ereignisprotokoll
--- eintragen lassen;
+--- sie koennen Raiseerrror mit jedem Schweregrad ins Ereignisprotokoll
+--- eintragen lassen;
 ````sql
-	raiserror(600000,13,1) with log;	-- Fehler 600000 im Ereignisprotokoll
-	
+	raiserror(600000,13,1) with log;	--- Fehler 600000 im Ereignisprotokoll
+
 ````
 .
 
--- AdHoc - Meldungen
+--- AdHoc - Meldungen
 ````sql
 	raiserror('Heute ist Donners### TAG.',10,1);
-	
+
 ````
 .
 ````sql
@@ -4056,11 +4174,11 @@ raiserror(600000,21,1) with log;	-- schwerer Fehler
 .
 
 
--- Variable
--- der Inhalt einer Variablen steht nur innerhalb der Stapel zur Verfuegung
--- in dem die Variable deklariert wurde
+--- Variable
+--- der Inhalt einer Variablen steht nur innerhalb der Stapel zur Verfuegung
+--- in dem die Variable deklariert wurde
 
--- Deklaration
+--- Deklaration
 ````sql
 	declare @ort varchar(50), @farbe varchar(10), @nummer char(3)
 	declare @kuchen xml;
@@ -4071,9 +4189,9 @@ declare @erg table(nummer char(3),
 ````
 .
 
--- Wertzuweissung
+--- Wertzuweissung
 
--- 1. Werte fuer skalare Variablen 
+--- 1. Werte fuer skalare Variablen 
 ````sql
 	set @ort = 'Hamburg';
 	set @farbe = 'rot';
@@ -4082,10 +4200,10 @@ set @nummer = 'A03';
 .
 
 
--- 2. Werte durch Abfrage
+--- 2. Werte durch Abfrage
 ````sql
 	select @ort = astadt, @farbe = farbe from artikel where anr = @nummer;
-	
+
 ````
 .
 ````sql
@@ -4100,21 +4218,21 @@ insert into @erg select anr, aname, amenge from artikel where astadt = @ort;
 ````
 .
 
--- Variableninhalt anzeigen lassen
+--- Variableninhalt anzeigen lassen
 ````sql
 	select @ort as [Ortsvariable], @farbe as [Farbe], @nummer as [Artikelname];
-	
+
 ````
 .
 
--- zu 2tens 
+--- zu 2tens 
 ````sql
 	print 'Der Artikel' + ' (' + @nummer + ') ist ' + @farbe + ' und lagert in ' + @ort;
-	
+
 ````
 .
 
--- xml
+--- xml
 ````sql
 	select @kuchen;
 	````
@@ -4122,7 +4240,7 @@ insert into @erg select anr, aname, amenge from artikel where astadt = @ort;
 
 
 
--- Tabellenvariable
+--- Tabellenvariable
 ````sql
 	select * from @erg;
 	go
@@ -4136,9 +4254,9 @@ insert into @erg select anr, aname, amenge from artikel where astadt = @ort;
 .
 
 
--- Sprachkonstukte
+--- Sprachkonstukte
 
--- IF/ELSE
+--- IF/ELSE
 ````sql
 	declare @tab sysname = 'zitrone'
 	if not exists(select * from sys.tables where object_id = object_id(@tab))
@@ -4174,14 +4292,14 @@ go
 .
 
 
--- neu im Angebot
+--- neu im Angebot
 ````sql
 	drop table if exists zitrone;
-	
+
 ````
 .
 
--- Schleifen
+--- Schleifen
 ````sql
 	declare @x int = 1;
 	while @x <=10
@@ -4194,7 +4312,7 @@ end;
 
 
 
--- Try -- CATCH
+--- Try --- CATCH
 ````sql
 	begin try
 		begin 
@@ -4213,7 +4331,7 @@ go
 .
 
 
--- und
+--- und
 ````sql
 	begin try
 		begin
@@ -4244,7 +4362,7 @@ go
 .
 
 
--- Dynamische SQL Anweissungen
+#### --- Dynamische SQL Anweissungen
 ````sql
 	declare @tab sysname, @nr char(3), @spalte1 sysname, @spalte2 sysname
 	set @nr = 'A03';
@@ -4255,23 +4373,23 @@ set @spalte2 = 'astadt';
 .
 
 
--- select @spalte1, @spalte2 from @tab where anr = @nr;
+--- select @spalte1, @spalte2 from @tab where anr = @nr;
 
--- in der FROM - Klausel darf nur ein Tabellenname oder eine Tabellenvariable stehen
--- der Abfrageoptimierer stellt fest das eine Variable in der FROM - Klausel steht,
--- sie aber nicht als Variable deklariert wurde.
+--- in der FROM - Klausel darf nur ein Tabellenname oder eine Tabellenvariable stehen
+--- der Abfrageoptimierer stellt fest das eine Variable in der FROM - Klausel steht,
+--- sie aber nicht als Variable deklariert wurde.
 
--- wir benoetigen eine dynamische SQL Anweisung. diese wird erst zur Laufzeit 
--- aufgebaut und mit execute ausgefuehrt.
+--- wir benoetigen eine dynamische SQL Anweisung. diese wird erst zur Laufzeit 
+--- aufgebaut und mit execute ausgefuehrt.
 
--- den Abfragestring koennen sie einer Variablen uebergeben oder direkt
--- im EXECUTE definieren
+--- den Abfragestring koennen sie einer Variablen uebergeben oder direkt
+--- im EXECUTE definieren
 
--- exec('select' + @spalte1 + ',' +@spalte2 + 'from' + @tab + 'where anr =' + @nr);
+--- exec('select' + @spalte1 + ',' +@spalte2 + 'from' + @tab + 'where anr =' + @nr);
 
--- declare @sql varchar(max)
--- set @sql = 'select' + @spalte1 + ', ' + @spalte2 + 'from' + @tab + 'where anr = ' + @nr;
--- select @sql;
+--- declare @sql varchar(max)
+--- set @sql = 'select' + @spalte1 + ', ' + @spalte2 + 'from' + @tab + 'where anr = ' + @nr;
+--- select @sql;
 ````sql
 	declare @tab sysname, @nr char(3), @spalte1 sysname, @spalte2 sysname
 	set @nr = 'A03';
@@ -4301,13 +4419,13 @@ go
 
 	````
 .
--- alter database standard modify file (name = standard,
-									 -- maxsize =20 GB);
--- go
+--- alter database standard modify file (name = standard,
+									 --- maxsize =20 GB);
+--- go
 
--- alter database standard modify file (name = standard_log,
-									 -- maxsize =10 GB);
--- go
+--- alter database standard modify file (name = standard_log,
+									 --- maxsize =10 GB);
+--- go
 ````sql
 	if db_name() in('master','tembdb','msdb','model')
 	begin
@@ -4319,7 +4437,7 @@ end;
 
 ````sql
 	declare @realsize bigint = 0, @maxsize bigint = 0, @name varchar(2000);
-	
+
 ````
 .
 ````sql
@@ -4329,7 +4447,7 @@ end;
 ````
 .
 
--- alles zusammmen auswaehlen
+--- alles zusammmen auswaehlen
 ````sql
 	open filegroesse;
 	````
@@ -4368,7 +4486,7 @@ Datensaetze dieser Tabelle in einem Tabellenergebnis, mit den
 Spalten "Tabellenname" und "Anzahl Datensaetze" ausgibt
 */
 
--- bevorzugtes Ergebnis
+--- bevorzugtes Ergebnis
 ````sql
 	declare @ausgabe table(Tabellenname varchar(200), Anzahl_Datensätze int);
 	declare @anz table (anzahl int);
@@ -4404,7 +4522,7 @@ go
 .
 
 
--- funktioniert aber Herr Lohse war nicht begeistert
+--- funktioniert aber Herr Lohse war nicht begeistert
 ````sql
 	SELECT o.name, i.rowcnt
 	FROM sysindexes AS i
@@ -4417,7 +4535,8 @@ ORDER BY o.name
 .
 
 
--- oder so, aber Herr Lohse ist immer noch nicht begeistert
+--- oder
+ so, aber Herr Lohse ist immer noch nicht begeistert
 ````sql
 	SELECT o.name, ddps.row_count
 	FROM sys.indexes AS i
@@ -4438,7 +4557,7 @@ ORDER BY o.name
 Uebung 8:
 ````sql
 	declare @tabname sysname = 'artikel', @indname varchar(100) = 'anr_pk';
-	
+
 ````
 .
 
@@ -4458,7 +4577,7 @@ gebildet werden.
 
 ````sql
 	declare @tabname sysname = 'artikel', @indname varchar(100) = 'anr_ps';
-	
+
 ````
 .
 
@@ -4466,7 +4585,7 @@ gebildet werden.
 
 ````sql
 	declare @tabvoll sysname, @indid int;
-	
+
 select @tabvoll = a.name + '.' + b.name 
 from sys.schemas as a join sys.tables as b 
 on a.schema_id = b.schema_id 
@@ -4520,39 +4639,39 @@ go
 .
 
 
--- Programieren von Scripten
+#### --- Programieren von Scripten
 
--- ein Script besitzt die Endung .sql es kann manuell ueber den SSMS oder ueber
--- SQL CMD gestartet werden. Aussserdem kann ein Script in Auftraege des Betriebssystem
--- eingebunden werden und durch diese gestartet werden
+--- ein Script besitzt die Endung .sql es kann manuell ueber den SSMS oder ueber
+--- SQL CMD gestartet werden. Aussserdem kann ein Script in Auftraege des Betriebssystem
+--- eingebunden werden und durch diese gestartet werden
 
--- Grundlegender Umgang bei der Arbeit mit Variablen
+--- Grundlegender Umgang bei der Arbeit mit Variablen
 
--- 1. eine Variable muss deklariert werden
--- 2. danach wird die Variabe mit Werten gefuellt 
+--- 1. eine Variable muss deklariert werden
+--- 2. danach wird die Variabe mit Werten gefuellt 
 --			- dazu verwendet man SET oder die SELECT Anweissung in Verbindung mit
 --			- Sprachkonstrukten der Sprache TQSL
 --					-IF/ELSE, Anweissungsbloecke. WHILE, TRY and CATCH
 --					-raiseerror, print, return
--- 3. Anzeigen und Ausgeben des Inhalts der Variablen 
--- eine normale Variable muss nicht Vernichtet werden, da sie nach dem GO im Stapel
--- nicht mehr existiert
+--- 3. Anzeigen und Ausgeben des Inhalts der Variablen 
+--- eine normale Variable muss nicht Vernichtet werden, da sie nach dem GO im Stapel
+--- nicht mehr existiert
 
--- eine Variable vom Typ Cursor wird deklariert, geoeffnet, mit fetch durchsucht,
--- mit Close geschlossen und mit deallocate vernichtet
--- ein Cursor wird immer dann verwendet, wenn fuer eine Menge von Ergebnissen
--- fuer jede einzelne Teilmenge ein Entscheidung getroffen werden muss
--- Beispiel: Ermitteln aller Daten und Protokolldateien einer Datenbank feststellen
+--- eine Variable vom Typ Cursor wird deklariert, geoeffnet, mit fetch durchsucht,
+--- mit Close geschlossen und mit deallocate vernichtet
+--- ein Cursor wird immer dann verwendet, wenn fuer eine Menge von Ergebnissen
+--- fuer jede einzelne Teilmenge ein Entscheidung getroffen werden muss
+--- Beispiel: Ermitteln aller Daten und Protokolldateien einer Datenbank feststellen
 --			der Groesse jeder Datei, und die Datei vekleinern wenn eine kritische 
 --			Groesse erreicht wurde
 
 -------
 
--- Dynamische SQL Anweisungen
+#### --- Dynamische SQL Anweisungen
 
--- Beispiel:
--- 1. select spalte, spalte from tabelle where spalte = @wert, GEHT IMMER
--- 2. select @spvar, @spvar from @tabvar where @spvar = @wert; ES WIRD EINE DYNAMISCHE 
+--- Beispiel:
+--- 1. select spalte, spalte from tabelle where spalte = @wert, GEHT IMMER
+--- 2. select @spvar, @spvar from @tabvar where @spvar = @wert; ES WIRD EINE DYNAMISCHE 
 --															   ABFRAGE BENOETIGT.
 ````sql
 	declare @sp1 sysname, @sp2 sysname, @tab sysname, @wert int = 0;
@@ -4565,23 +4684,23 @@ set @wert = 300;
 .
 
 
--- Wie es nicht geht
+--- Wie es nicht geht
 ````sql
-	select @sp1 from @tab where @sp2 >= @wert;  -- SO GEHT ES NICHT!!
-	
+	select @sp1 from @tab where @sp2 >= @wert;  --- SO GEHT ES NICHT!!
+
 ````
 .
 
--- Wie es geht
+--- Wie es geht
 ````sql
 	execute('select ' + @sp1 + ' from ' + @tab + ' where ' + @sp2 + ' >= ' + @wert);
-	
-						-- aufpassen auf Leerzeichen!!!!!!!
+
+						--- aufpassen auf Leerzeichen!!!!!!!
 ````
 .
 
 
--- ueberpruefen mit 
+--- ueberpruefen mit 
 ````sql
 	declare @sp1 sysname, @sp2 sysname, @tab sysname, @wert int = 0;
 	declare @sql varchar(max);
@@ -4601,7 +4720,8 @@ select @sql;
 
 
 
---oder
+--- oder
+
 ````sql
 	exec(@sql);
 	go
@@ -4611,7 +4731,7 @@ select @sql;
 						
 --------
 
--- gespeicherte Systemprozeduren
+--- gespeicherte Systemprozeduren
 ````sql
 	exec sp_help 'lieferant';
 	exec sp_help;
@@ -4620,28 +4740,28 @@ go
 .
 
 
--- Benutzerdefenierte gespeicherte Prozeduren
+#### --- Benutzerdefenierte gespeicherte Prozeduren
 
--- eine Prozedur kann KEINEN, EINEN oder MEHRERE Parameter uebernehmen
--- im Koerper einer Prozedur koennen mehrere Anweisungen enthalten sein 
--- eine Prozedeur kann weitere Prozeduren aufrufen. 
--- die Verschachtelungsebene sarf 32 nicht ueberschreiten 
--- feststellen in welcher Ebene ich mich befinde mit @@nestlevel
+--- eine Prozedur kann KEINEN, EINEN oder MEHRERE Parameter uebernehmen
+--- im Koerper einer Prozedur koennen mehrere Anweisungen enthalten sein 
+--- eine Prozedeur kann weitere Prozeduren aufrufen. 
+--- die Verschachtelungsebene sarf 32 nicht ueberschreiten 
+--- feststellen in welcher Ebene ich mich befinde mit @@nestlevel
 
--- gespeicherte Prozeduren koennen auch mit CLR ( Common Language Runtime)
--- erstellt werden, als Assembley im SQL Seerver bekannt gemacht werden
--- und aus dem Assembly mit create procedure.. eine gespeicherte Prozedur erstellen
--- CLR --> .NET farhige Programmierung
+--- gespeicherte Prozeduren koennen auch mit CLR ( Common Language Runtime)
+--- erstellt werden, als Assembley im SQL Seerver bekannt gemacht werden
+--- und aus dem Assembly mit create procedure.. eine gespeicherte Prozedur erstellen
+--- CLR --> .NET farhige Programmierung
 
--- Vorteile
--- 1. die modulare Programmierung SQL Code wird zu einer Einheit kompiliert
--- 2. die Geschwindigkeit: nach dem ersten Ausfuehren der Prozedur wird der 
---    kompilierte Ausfuehrungsplan in den Prozedurcache abgeleget und jede erneute 
---    Ausfuehrung greift nur noch auf den Prozedurcache zurueck
--- 3. Reduzierung des Netzwerkverkehrs
--- 4. Verwendung als Sicherheitsmechanismus. Werden Informationen aus kritischen
---    Umgebungen (Internet) direkt in die Datenbank gespeichert sollte dazu
---    eine Prozedur zwischengeschaltet werden. Plausibilitaetspruefung
+--- Vorteile
+--- 1. die modulare Programmierung SQL Code wird zu einer Einheit kompiliert
+--- 2. die Geschwindigkeit: nach dem ersten Ausfuehren der Prozedur wird der 
+---    kompilierte Ausfuehrungsplan in den Prozedurcache abgeleget und jede erneute 
+---    Ausfuehrung greift nur noch auf den Prozedurcache zurueck
+--- 3. Reduzierung des Netzwerkverkehrs
+--- 4. Verwendung als Sicherheitsmechanismus. Werden Informationen aus kritischen
+---    Umgebungen (Internet) direkt in die Datenbank gespeichert sollte dazu
+---    eine Prozedur zwischengeschaltet werden. Plausibilitaetspruefung
 ````sql
 	use standard
 	go 
@@ -4649,7 +4769,7 @@ go
 ````
 .
 
--- gespeicherte Prozeduren erstellen
+--- gespeicherte Prozeduren erstellen
 ````sql
 	create procedure mathe
 	as
@@ -4664,7 +4784,7 @@ go
 .
 
 
--- Prozedur starten
+--- Prozedur starten
 ````sql
 	exec mathe;
 	go
@@ -4674,7 +4794,7 @@ go
 
 -----------
 
--- Parameteruebergabe an die Prozedur
+--- Parameteruebergabe an die Prozedur
 ````sql
 	create procedure mathe1 @zahl1 float, @zahl2 float
 	as
@@ -4699,7 +4819,7 @@ go
 
 -------------
 
--- Parametervariablen der Prozedeur mit Default - Werten belegen
+--- Parametervariablen der Prozedeur mit Default - Werten belegen
 ````sql
 	create procedure mathe2 @zahl1 float = 1, @zahl2 float = 1
 	as
@@ -4716,7 +4836,7 @@ go
 
 ````sql
 	exec mathe2 12.88,19.7; 
-	
+
 exec mathe2 12.88; 
 
 exec mathe2;
@@ -4728,7 +4848,7 @@ go
 .
 
 
--- die Prozedur soll das berechnete Ergebnis an das aufrufende Programm zuruekgeben
+--- die Prozedur soll das berechnete Ergebnis an das aufrufende Programm zuruekgeben
 ````sql
 	create procedure mathe3 @zahl1 float = 1, @zahl2 float = 1, @erg float output
 	as
@@ -4739,7 +4859,7 @@ go
 
 
 
--- Aufruf
+--- Aufruf
 ````sql
 	declare @ergebnis float
 	exec mathe3 5.88, 2.66, @ergebnis output;
@@ -4749,7 +4869,7 @@ go
 .
 
 
--- Fehlerhafte Parameterwerte verhindern
+--- Fehlerhafte Parameterwerte verhindern
 ````sql
 	create procedure mathe4 @zahl1 float = 1, @zahl2 float = 1, @erg float output
 	as
@@ -4779,7 +4899,7 @@ go
 .
 
 
--- Die Prozedur gibt einen Return - Wert zurueck
+--- Die Prozedur gibt einen Return - Wert zurueck
 ````sql
 	create procedure mathe5 @zahl1 float = 1, @zahl2 float = 1, @erg float output
 	as
@@ -4813,7 +4933,7 @@ der Artikel mit der angegebenen Farbe anzeigen bzw zurueckgeben.
 (Erweiterung: wird keine Farbe übergeben sollen alle Artikel angezeigt werden)
 */
 
--- einfache Abfrage
+--- einfache Abfrage
 ````sql
 	select anr, aname, astadt
 	from artikel 
@@ -4823,7 +4943,7 @@ go
 .
 
 
--- Prozedur erstellen ( Ergebnis anzeigen)
+--- Prozedur erstellen ( Ergebnis anzeigen)
 ````sql
 	create procedure farb_art @farbe varchar(10)
 	as
@@ -4841,7 +4961,7 @@ go
 .
 
 
--- das Ergebnis anzeigen und den Übergabe Paramter temporaer stellen
+--- das Ergebnis anzeigen und den Übergabe Paramter temporaer stellen
 ````sql
 	alter procedure farb_art @farbe varchar(10) = null
 	as
@@ -4870,10 +4990,10 @@ go
 .
 
 
--- die Prozedur soll  das Ergebnis an das aufrufende Programm zurueckgeben
--- 1. mit einer permanenten Tabelle
+--- die Prozedur soll  das Ergebnis an das aufrufende Programm zurueckgeben
+--- 1. mit einer permanenten Tabelle
 
--- Tabelle erstellen
+--- Tabelle erstellen
 ````sql
 	create table art_ergebnis
 	(Artikelnummer char(3),
@@ -4883,14 +5003,14 @@ Lagerort varchar(200));
 .
 
 
--- Tabelle füllen
+--- Tabelle füllen
 ````sql
 	insert into art_ergebnis exec farb_art 'rot';
-	
+
 ````
 .
 
--- Tabelle abrufen
+--- Tabelle abrufen
 ````sql
 	select * from art_ergebnis;
 	go
@@ -4898,7 +5018,7 @@ Lagerort varchar(200));
 .
 
 
--- 2. mit einer Tabellenvariablen
+--- 2. mit einer Tabellenvariablen
 ````sql
 	declare @erg table (Artikelnummer char(3),
 				   	Artikelname varchar(300),
@@ -5025,11 +5145,11 @@ Uebung 10:
 
 /*
 
-SQL Server
+### SQL Server
 
-21. Juni 2022
 
-Aufgabe
+
+#### Aufgabe [21. Juni 2022]
 
 Schreiben Sie eine gespeicherte Prozedur welche den Fragmentierungsgrad der
 Indizes, der Tabellen der Datenbank Standard, überprüft und die Indizes bei Bedarf
@@ -5058,7 +5178,7 @@ Ich wünsche Ihnen viel Erfolg.
 
 */
 
--- Prozedur Index Defragmentieren.sql
+--- Prozedur Index Defragmentieren.sql
 ````sql
 	use standard;
 	go
@@ -5142,10 +5262,10 @@ go
 
 
 
--- pruefen mit
+--- pruefen mit
 ````sql
 	exec ind_defr;
-	
+
 exec ind_defr Artikel;
 
 exec ind_defr Artikel, anr_ps;
@@ -5153,7 +5273,7 @@ exec ind_defr Artikel, anr_ps;
 ````
 .
 
--- Prozedur loeschen
+--- Prozedur loeschen
 ````sql
 	drop procedure [ind_defr];  
 	go  
@@ -5171,7 +5291,7 @@ exec ind_defr Artikel, anr_ps;
 .
 
 
--- Datenbankschemas erstellen
+--- Datenbankschemas erstellen
 ````sql
 	create schema lager;
 	go
@@ -5181,7 +5301,7 @@ go
 .
 
 
--- Datenbank Tabellen den jeweiligen Schemas zuordnen
+--- Datenbank Tabellen den jeweiligen Schemas zuordnen
 ````sql
 	alter schema lager transfer dbo.artikel;
 	go
@@ -5203,16 +5323,16 @@ go
 
 
 
--- Was ist passiert?
+--- Was ist passiert?
 ````sql
-	select * from artikel;			-- dieser Zugriff geht nicht mehr
-	select * from lager.artikel;	-- funktioniert
+	select * from artikel;			--- dieser Zugriff geht nicht mehr
+	select * from lager.artikel;	--- funktioniert
 
 ````
 .
 
--- wenn diese Anweisung geht, dann wurden die Fremdschluessel im
--- Hintergrund richtig umgeschrieben
+--- wenn diese Anweisung geht, dann wurden die Fremdschluessel im
+--- Hintergrund richtig umgeschrieben
 ````sql
 	insert into verkauf.lieferung values('L04','A03',500,getdate());
 	go
@@ -5222,31 +5342,31 @@ go
 
 ------
 
--- Berechtigungsverewaltung an Datenbanksystemen speziell am SQL Server
+--- Berechtigungsverewaltung an Datenbanksystemen speziell am SQL Server
 
--- die Verwaltung von Berechtigungen erfolt auf drei Ebenen
--- 1. Serverebene (Instanzebene)
--- 2. Datenbankebene
--- 3. Object oder Schemaebene
+--- die Verwaltung von Berechtigungen erfolt auf drei Ebenen
+--- 1. Serverebene (Instanzebene)
+--- 2. Datenbankebene
+--- 3. Object oder Schemaebene
 
--- Logins einreichten
--- Es gibt zwei Arten der Authentifizierung
+--- Logins einreichten
+--- Es gibt zwei Arten der Authentifizierung
 
--- Windows Authentifizierung
--- wird verwendet fuer Benutzer (Windowsuser, Windowsgruppen oder Anwendungen)
--- die in der gleichen Domaene arbeiten wie SQL Server
--- es wird nur der Benutzernmame des Logins gespeichert und nicht das Password
--- beim Password vertraut SQL Server dem Active Directorie
+--- Windows Authentifizierung
+--- wird verwendet fuer Benutzer (Windowsuser, Windowsgruppen oder Anwendungen)
+--- die in der gleichen Domaene arbeiten wie SQL Server
+--- es wird nur der Benutzernmame des Logins gespeichert und nicht das Password
+--- beim Password vertraut SQL Server dem Active Directorie
 
--- SQL Server Authentifizierung
--- wird verwendet fuer Logins die sich von ausserhalb der Domaene mit dem
--- SQL Server verbinden muessen
+--- SQL Server Authentifizierung
+--- wird verwendet fuer Logins die sich von ausserhalb der Domaene mit dem
+--- SQL Server verbinden muessen
 
--- die Instanz von SQLServer arbeitet in zwei Modis.
+--- die Instanz von SQLServer arbeitet in zwei Modis.
 --	1. Nur Windowsauthentifizierung
 --	2. gemischte Authentifizierung
 --	   dieser Modus kann grafisch oder mit der Prozedur sp_configure festgelegt werden
---     Achtung, danach muss da DBMS gestartet werden
+---     Achtung, danach muss da DBMS gestartet werden
 
 ````sql
 	use master;
@@ -5256,7 +5376,7 @@ go
 
 
 
--- Windows Authentifizierung
+#### --- Windows Authentifizierung
 ````sql
 	create login [sql16\verwaltung] from windows;
 	go
@@ -5277,13 +5397,13 @@ go
 
 
 
--- der Benutzer Horst darf sich nie mit dem SQL Server verbinden
--- Horst ist Mitglied der Windowsgruppe 'verwaltung' und diese Gruppe
--- hat einen Login in der SQL Server Instanz. Damit hat Horst automatisch
--- auch einen Login.
--- Problemloesung
+--- der Benutzer Horst darf sich nie mit dem SQL Server verbinden
+--- Horst ist Mitglied der Windowsgruppe 'verwaltung' und diese Gruppe
+--- hat einen Login in der SQL Server Instanz. Damit hat Horst automatisch
+--- auch einen Login.
+--- Problemloesung
 
--- Horst Login erstellen
+#### --- Horst Login erstellen
 ````sql
 	create login [sql16\horst] from windows;
 	go
@@ -5291,7 +5411,7 @@ go
 .
 
 
--- und Zugriff verweigern
+--- und Zugriff verweigern
 ````sql
 	deny connect sql to [sql16\horst];
 	go
@@ -5299,7 +5419,7 @@ go
 .
 
 
--- SQL Server Logins
+#### --- SQL Server Logins
 ````sql
 	create login [Frank] with Password = 'Pa$$w0rd';
 	go
@@ -5313,14 +5433,14 @@ go
 .
 
 
--- Erstellen von Serverrollen, zuweisen von Serverberechtigungen
--- arbeit mit festen Serverrollen
+#### --- Erstellen von Serverrollen, zuweisen von Serverberechtigungen
+--- arbeit mit festen Serverrollen
 
--- Diana soll Sysadmin werden
+--- Diana soll Sysadmin werden
 
 alter server role sysadmin add member [sql16\diana];
 
--- erstellen einer benutzerdefinierten Serverrolle
+--- erstellen einer benutzerdefinierten Serverrolle
 ````sql
 	create server role useredit;
 	go
@@ -5329,7 +5449,7 @@ alter server role sysadmin add member [sql16\diana];
 .
 
 
--- Mitglieder der Rolle sollen logins bearbeiten koennen
+--- Mitglieder der Rolle sollen logins bearbeiten koennen
 ````sql
 	grant alter any login to useredit;
 	go
@@ -5337,7 +5457,7 @@ alter server role sysadmin add member [sql16\diana];
 .
 
 
--- der Rolle sollen die Benutzer der Windowsrolle Verwaltung zugewiesen werden
+--- der Rolle sollen die Benutzer der Windowsrolle Verwaltung zugewiesen werden
 ````sql
 	alter server role useredit add member [sql16\Verwaltung];
 	go
@@ -5345,7 +5465,7 @@ alter server role sysadmin add member [sql16\diana];
 .
 
 
--- weitere Berechtigung fuer die Serverrolle useredit
+--- weitere Berechtigung fuer die Serverrolle useredit
 
 ````sql
 	grant alter any credential to [useredit]
@@ -5356,9 +5476,9 @@ alter server role sysadmin add member [sql16\diana];
 
 ----------
 
--- 2.Ebene Datenbank 
+### --- 2.Ebene Datenbank 
 
--- Datenbankbenutzer einrichten
+#### --- Datenbankbenutzer einrichten
 
 use standard;
 go
@@ -5371,7 +5491,7 @@ Datenbank Standard verbinden duerfen
 create user verwaltung from login [sql16\verwaltung];
 go
 
--- Standardschema fuer den Datenbankbenutzer Verwaltung festlegen
+--- Standardschema fuer den Datenbankbenutzer Verwaltung festlegen
 
 alter user verwaltung with default_schema = verkauf;
 go
@@ -5387,7 +5507,7 @@ Weiterhin werden 2 Logins (Willi1 und Willi2) bereitgestellt denen er in der
 Trainingsdatenbank Berechtigungen erteilen kann.
 */
 
--- master
+--- master
 
 use master
 go
@@ -5399,10 +5519,10 @@ go
 create database training;
 go
 
--- Karl den Datenbankzugriff auf standard verbieten und den 
--- Zugriff auf Training erlauben
+--- Karl den Datenbankzugriff auf standard verbieten und den 
+--- Zugriff auf Training erlauben
 
--- standard
+--- standard
 
 use standard;
 go
@@ -5412,7 +5532,7 @@ go
 deny connect to karl;
 go
 
--- training
+--- training
 
 use training;
 go
@@ -5425,12 +5545,12 @@ go
 use standard;
 go
 
--- benutzerdefinierte Datenbankrolle erstellen
+--- benutzerdefinierte Datenbankrolle erstellen
 
 create role dbconfig;
 go
 
--- Berechtigungen zuweisen
+--- Berechtigungen zuweisen
 
 grant create view to dbconfig;
 go
@@ -5447,10 +5567,10 @@ go
 
 --------
 
--- 3. Ebene -- Datenbankobjekte
+--- 3. Ebene --- Datenbankobjekte
 
--- Frank und Dieter sollen SELECT, UPDATE und INSERT Berechtigungen
--- auf die Tabellen Lieferant und Lieferung im Schema  Verkauf erhalten
+--- Frank und Dieter sollen SELECT, UPDATE und INSERT Berechtigungen
+--- auf die Tabellen Lieferant und Lieferung im Schema  Verkauf erhalten
 
 grant insert, update, select
 on schema::verkauf
@@ -5460,7 +5580,7 @@ grant insert, update, select
 on schema::verkauf
 to dieter;
 
--- Delete fuer die Tabelle Lieferung fuer Frank und Dieter erlauben
+--- Delete fuer die Tabelle Lieferung fuer Frank und Dieter erlauben
 ```sql
 grant delete
 on verkauf.lieferung
@@ -5469,8 +5589,8 @@ to dieter;
 .
 
 
--- den Mitarbeitern von Verwaltung alle Rechte auf die Tabellen
--- Lieferant, Artikel und Lieferung zuweisen
+--- den Mitarbeitern von Verwaltung alle Rechte auf die Tabellen
+--- Lieferant, Artikel und Lieferung zuweisen
 ```sql
 grant insert, update, select, delete
 on schema::verkauf
@@ -5589,7 +5709,7 @@ go
 .
 
 
--- Uberprüfen ob ich Systemadmin bin --
+--- Uberprüfen ob ich Systemadmin bin --
 ```sql
 select a.role_principal_id, b.name as [Rollenname], a.member_principal_id,
 							c.name as [Mitgliedsname]
@@ -5601,14 +5721,14 @@ on a.member_principal_id = c.principal_id;
 .
 
 
--- Wenn das nicht der Fall ist: Verbinden mit den 5Qt Server als SA --
+--- Wenn das nicht der Fall ist: Verbinden mit den 5Qt Server als SA --
 ```sql
 alter server role sysadmin add member [sql16\student];
 
 ```
 .
 
--- Danach wieder als Student mit dem 5QL Server verbinden --
+--- Danach wieder als Student mit dem 5QL Server verbinden --
 
 --Test- Datenbank und Test- Logins für den Lehrling erstellen:
 ```sql
@@ -5625,7 +5745,7 @@ go
 .
 
 
--- Login und Serverberechtigungen für den Stellvertreter --
+--- Login und Serverberechtigungen für den Stellvertreter --
 ```sql
 create login [sql16\ralf] from windows;
 alter server role dbcreator add member [sql16 \ralf];
@@ -5635,7 +5755,7 @@ alter server role securityadmin add member [sql16\ralf];
 ```
 .
 
--- Datenbankrollen für den Stellvertreter --
+--- Datenbankrollen für den Stellvertreter --
 ```sql
 use standard;
 go
@@ -5660,7 +5780,7 @@ go
 
 use master;
 
--- Logins für die Abteilungen erstellen --
+--- Logins für die Abteilungen erstellen --
 ```sql
 create login [sqll6\office] from windows;
 create login [sql16\custumer _service] from windows;
@@ -5669,7 +5789,7 @@ create login [sql16\Purchase] from windows;
 ```
 .
 
--- Logins für Außendienstmitarbeiter --
+--- Logins für Außendienstmitarbeiter --
 ```sql
 create login Acksteiner with password = 'Pa$$w0rd';
 create login Reichardt with password = 'Pa$$w0rd';
@@ -5682,7 +5802,7 @@ go
 
 -----------------------------------------------------------------------------
 
--- Zugriff auf Datenbank Urbiworks erteilen --
+--- Zugriff auf Datenbank Urbiworks erteilen --
 ```sql
 use UrbiWorks;
 go
@@ -5711,7 +5831,7 @@ go
 .
 
 
--- Den Lehrlingen den Zugriff auf die Datenbank UrbiWorks verweigern --
+--- Den Lehrlingen den Zugriff auf die Datenbank UrbiWorks verweigern --
 ```sql
 create user Neuer from login [sql16\neuer];
 create user [Alter] from login [sql16\alter];
@@ -5727,7 +5847,7 @@ go
 .
 
 
--- Den Lehrlingen den Zugriff auf die Datenbank Standard verweigern --
+--- Den Lehrlingen den Zugriff auf die Datenbank Standard verweigern --
 ```sql
 use standard;
 go
@@ -5750,7 +5870,7 @@ go
 
 
 
--- Für die Lehrlinge die Database Email ermöglichen --
+--- Für die Lehrlinge die Database Email ermöglichen --
 ```sql
 use msdb;
 go
@@ -5767,7 +5887,7 @@ alter role databasemailuserrole add member [Alter];
 ```
 .
 
--- Für die Lehrlinge die Datenbank Uebung vorbereiten --
+--- Für die Lehrlinge die Datenbank Uebung vorbereiten --
 ```sql
 use uebung
 go
@@ -5796,7 +5916,7 @@ go
 .
 
 
--- Berechtigungen für Kerstin Ziegler --
+--- Berechtigungen für Kerstin Ziegler --
 ```sql
 use master;
 go
@@ -5832,7 +5952,7 @@ go
 .
 
 
--- Außendienstmitarbeiter --
+--- Außendienstmitarbeiter --
 ```sql
 create user Acksteiner from login Acksteiner;
 create user Reichardt from login Reichardt;
@@ -5876,7 +5996,7 @@ grant select on schema::stock to aussendienst;
 ```
 .
 
--- Abteilung Office --
+--- Abteilung Office --
 ```sql
 grant select, insert, update, delete
 on schema::office to Office;
@@ -5892,7 +6012,7 @@ go
 .
 
 
--- Abteilung Kundendienst --
+--- Abteilung Kundendienst --
 ```sql
 grant select, insert, update
 on stock.lieferung to kundendienst;
@@ -5901,7 +6021,7 @@ go
 .
 
 
--- Abteilung Purchase --
+--- Abteilung Purchase --
 ```sql
 grant insert, update
 on office.artikel to purchase;
@@ -5944,42 +6064,42 @@ go
 .
 
 
--- Sichern und Wiederherstellen von Datenbanken
--- gesichert koennen alle benutzerdefinierten Datenbanken werden und 
--- Systemdatenbanken ausser die tempdb. die tempdb kann deshalb nicht
--- gesichert werden weil sie beim herunterfahren des DBMS geloescht
--- und beim hochfahren neu erstellt wird
+#### --- Sichern und Wiederherstellen von Datenbanken
+--- gesichert koennen alle benutzerdefinierten Datenbanken werden und 
+--- Systemdatenbanken ausser die tempdb. die tempdb kann deshalb nicht
+--- gesichert werden weil sie beim herunterfahren des DBMS geloescht
+--- und beim hochfahren neu erstellt wird
 
--- Datenbanken sollten regelmaessig gesichert werden, egal welches 
--- System der Hochverfuegbarkeit verwendet wird
+--- Datenbanken sollten regelmaessig gesichert werden, egal welches 
+--- System der Hochverfuegbarkeit verwendet wird
 
--- Art und Weise der Sicherungsstrategie ist abhaengig vom 
--- Wiederherstellungsmodel der Datenbank
+--- Art und Weise der Sicherungsstrategie ist abhaengig vom 
+--- Wiederherstellungsmodel der Datenbank
 
--- 1. einfaches Wiederherstellungsmodel
+--- 1. einfaches Wiederherstellungsmodel
 --		 bei jedem Checkpoint wird der nicht aktive Teil des Tranaktionsprotokol
 --		 abgeschnitten
--- deshalb kann ich in diesem Modell dei Datenbank nur vollstaendig und 
--- differentiell sichern
+--- deshalb kann ich in diesem Modell dei Datenbank nur vollstaendig und 
+--- differentiell sichern
 
--- 2. vollstaendiges  Wiederherstellungsmodel
+--- 2. vollstaendiges  Wiederherstellungsmodel
 --		 bei einem Checkpoint wird das Protokoll nicht abgeschnitten
 --		 vollstaendige, differentielle und Protokollsicherungen sind moeglich
--- in diesem Model ist es moeglich die Datenbank bis zum Ausfallzeitpunkt
--- wiederherzustellen
--- damit das Protokoll nicht vollaueft (Fehler 9002) muss die Datenbank
--- regelmaessig eine Protokollsicherung durchfuehren.
--- Nur bei einer Protokollsicherung wird der nicht aktive Teil des Protokolls
--- abgeschnitten
+--- in diesem Model ist es moeglich die Datenbank bis zum Ausfallzeitpunkt
+--- wiederherzustellen
+--- damit das Protokoll nicht vollaueft (Fehler 9002) muss die Datenbank
+--- regelmaessig eine Protokollsicherung durchfuehren.
+--- Nur bei einer Protokollsicherung wird der nicht aktive Teil des Protokolls
+--- abgeschnitten
 
--- Massenprotolliertes Wiederherstellungsmodel ist eine Ergaenzung des
--- vollstaendigen Wiederherstellungsmodel und wird verwendet 
--- bei Massenkopiervorgaengen (bulk insert, select into ..., insert
--- mit openrowset(), ...)
+--- Massenprotolliertes Wiederherstellungsmodel ist eine Ergaenzung des
+--- vollstaendigen Wiederherstellungsmodel und wird verwendet 
+--- bei Massenkopiervorgaengen (bulk insert, select into ..., insert
+--- mit openrowset(), ...)
 
--- jede Sicherungslinie einer Datenbank beginnt mit einer vollstaendigen Sicherung
--- der Wechsel vom einfachen zum vollstaendigen Wiederherstellungsmodel
--- und umgekehrt unterbricht die Linie
+--- jede Sicherungslinie einer Datenbank beginnt mit einer vollstaendigen Sicherung
+--- der Wechsel vom einfachen zum vollstaendigen Wiederherstellungsmodel
+--- und umgekehrt unterbricht die Linie
 
 ------
 ```sql
@@ -5989,15 +6109,16 @@ go
 .
 
 
--- wohin sichern
--- direckt auf Bandlaufwerk (nicht mehr empfohlen weil alt)
--- eine Netzwerkfreigabe
--- auf eine lokale Festplatte (Device) sichern auf eine Netzwerkfreigabe
--- oder Bandlaufwerk
+--- wohin sichern
+--- direckt auf Bandlaufwerk (nicht mehr empfohlen weil alt)
+--- eine Netzwerkfreigabe
+--- auf eine lokale Festplatte (Device) sichern auf eine Netzwerkfreigabe
+--- oder
+ Bandlaufwerk
 
--- empfohlen wird ein sogenanntes Sicherungsdevice
+--- empfohlen wird ein sogenanntes Sicherungsdevice
 --			es handelt sich um einen Namen fuer Speicherort
--- Sicherungsdevice erstellen
+--- Sicherungsdevice erstellen
 ```sql
 exec sp_addumpdevice 'disk', 'master_sicher', 'g:\dbbackup\master_sicher.bak';
 go
@@ -6007,18 +6128,18 @@ go
 
 --------
 
--- Master Datenbank sichern
+#### --- Master Datenbank sichern
 ```sql
 backup database master to master_sicher with name = 'Master_voll';
 
 ```
 .
 
--- MSDB wurde grafisch gesichert
+--- MSDB wurde grafisch gesichert
 
--- Datenbank Standard sichern
+--- Datenbank Standard sichern
 
--- 1. vollstaendige Datenbanksicherung
+--- 1. vollstaendige Datenbanksicherung
 ```sql
 backup database standard to standard_sicher with name = 'standard_voll';
 go
@@ -6037,7 +6158,7 @@ insert into verkauf.lieferant values('L20','Krause',5,'Erfurt');
 ```
 .
 
--- sichern des Protokolls
+--- sichern des Protokolls
 ```sql
 backup log standard to standard_sicher with name = 'Protokoll';
 
@@ -6051,7 +6172,7 @@ insert into verkauf.lieferant values('L21','Pausine',5,'Erfurt');
 ```
 .
 
--- sichern des Protokolls
+--- sichern des Protokolls
 ```sql
 backup log standard to standard_sicher with name = 'Protokoll';
 
@@ -6065,7 +6186,7 @@ insert into verkauf.lieferant values('L22','Mit### TAG',5,'Erfurt');
 ```
 .
 
--- sichern des Protokolls
+--- sichern des Protokolls
 ```sql
 backup log standard to standard_sicher with name = 'Protokoll';
 
@@ -6073,7 +6194,7 @@ backup log standard to standard_sicher with name = 'Protokoll';
 .
 
 
--- differentielle Datenbanksicherung
+#### --- differentielle Datenbanksicherung
 ```sql
 backup database standard to standard_sicher 
 with name = 'standard_diff', differential;
@@ -6087,7 +6208,7 @@ insert into verkauf.lieferant values('L23','Fruehstueck',5,'Erfurt');
 ```
 .
 
--- sichern des Protokolls
+--- sichern des Protokolls
 ```sql
 backup log standard to standard_sicher with name = 'Protokoll';
 
@@ -6101,7 +6222,7 @@ insert into verkauf.lieferant values('L24','Brunch',5,'Erfurt');
 ```
 .
 
--- sichern des Protokolls
+--- sichern des Protokolls
 ```sql
 backup log standard to standard_sicher with name = 'Protokoll';
 
@@ -6115,14 +6236,14 @@ insert into verkauf.lieferant values('L25','Kaffee',5,'Erfurt');
 ```
 .
 
--- sichern des Protokolls
+--- sichern des Protokolls
 ```sql
 backup log standard to standard_sicher with name = 'Protokoll';
 
 ```
 .
 
--- sichern des Protokollfragments (auf Master Datenbank)
+--- sichern des Protokollfragments (auf Master Datenbank)
 ```sql
 use master;
 go
@@ -6136,16 +6257,16 @@ go
 .
 
 
--- Sicherungen ueberpruefen
+#### --- Sicherungen ueberpruefen
 
--- 1. ist der Medienheader intakt
+--- 1. ist der Medienheader intakt
 ```sql
 restore verifyonly from standard_sicher;
 
 ```
 .
 
--- 2. allgemeine Angaben ueber das Sicherungsmedium
+--- 2. allgemeine Angaben ueber das Sicherungsmedium
 ```sql
 restore labelonly from standard_sicher;
 ```
@@ -6153,7 +6274,7 @@ restore labelonly from standard_sicher;
 
 
 
--- 3. Aufbau der gesicherten Datenbank
+--- 3. Aufbau der gesicherten Datenbank
 ```sql
 restore filelistonly from  standard_sicher;
 ```
@@ -6161,7 +6282,7 @@ restore filelistonly from  standard_sicher;
 
 
 
--- 4. Sicherungshistory anzeigen (Sicherungsverlauf)
+--- 4. Sicherungshistory anzeigen (Sicherungsverlauf)
 ```sql
 restore headeronly from standard_sicher;
 ```
@@ -6169,9 +6290,9 @@ restore headeronly from standard_sicher;
 
 
 
--- Wiederherstellen der Datenbank Standard
+#### --- Wiederherstellen der Datenbank Standard
 
--- vollstaendige Sicherung wiederherstellen
+--- vollstaendige Sicherung wiederherstellen
 ```sql
 restore database standard from standard_sicher with file = 1, norecovery;
 go
@@ -6187,15 +6308,15 @@ restore headeronly from standard_sicher;
 
 
 ---
+
 ```sql
-
-```
-.
-
 restore database standard from standard_sicher with file = 6, norecovery;
 go
 
 restore headeronly from standard_sicher;
+```
+.
+
 
 ---
 ```sql
@@ -6220,7 +6341,7 @@ go
 
 
 
--- Datenbanken wiederhergestellt
+--- Datenbanken wiederhergestellt
 ```sql
 use standard;
 go
@@ -6234,11 +6355,11 @@ select * from verkauf.lieferant;
 .
 
 
--- Aufgaben automatisieren
+--- Aufgaben automatisieren
 
--- dafuer verwewndet man Auftraege
--- ein Auftrag besteht aus einem oder mehrern Auftragsschritten
--- ein Auftrag besitzt keinen oder mehreren Zeitplaene
+--- dafuer verwewndet man Auftraege
+--- ein Auftrag besteht aus einem oder mehrern Auftragsschritten
+--- ein Auftrag besitzt keinen oder mehreren Zeitplaene
 
--- damit Auftraege ausgefuehrt werden koennen - muss der SQL Server
--- Agent gestartet werden
+--- damit Auftraege ausgefuehrt werden koennen - muss der SQL Server
+--- Agent gestartet werden
