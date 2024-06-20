@@ -1,16 +1,22 @@
-#### 2.
+# db - standard.xls
+
+## Zusammenfassung
+#### Aufgabe 2. 
+
 - Artikelnummer, Name und Lagerort aller Artikel die am 23.7.90 versendet wurden
 	-- Wir brauchen folgende Tabellen :artikel Tabelle, lieferung-Tabelle  
 	-- Die Spalte die beiden gemeinsam ist : anr   
 	-- Nun teilen wir die Abfrage in einzelne Unterabfragen auf
 
 - Artikelnummer Name und Lagerort aller Artikel  
+
 ```sql
 SELECT anr,aname,astadt FROM artikel ;
 ```
 
 
 -  am 23.07.1990 geliefert  
+
 ```sql
 SELECT anr FROM lieferung  
 	WHERE ldatum = '23.07.1990' ;
@@ -18,6 +24,7 @@ SELECT anr FROM lieferung
 
 
 - Nun müssen die beiden Abfragen durch die Spalte die verglichen werden kann, verbunden werden (anr)
+
 ```sql
 SELECT anr,aname,astadt FROM artikel  
 	WHERE anr = (SELECT anr FROM lieferung  
@@ -26,9 +33,11 @@ SELECT anr,aname,astadt FROM artikel
 
 
           
-#### 3.
+#### Aufgabe 3. 
+
 - Nummern und Namen der Lieferanten, deren Status kleiner als der von Lieferant L03 ist.  
 -- Lieferanten  
+
 ```sql
 SELECT LNr, lname FROM lieferant  
 	WHERE status < (SELECT status FROM lieferant  
@@ -36,9 +45,11 @@ SELECT LNr, lname FROM lieferant
 ```
 
 
-#### 4.
+#### Aufgabe 4. 
+
 - die Liefermenge und das Lieferdatum an dem rote Muttern versendet wurden  
--- lieferung, artikel
+- lieferung, artikel
+
 ```sql
 SELECT anr, lmenge, ldatum FROM lieferung  
 WHERE anr = (SELECT anr FROM artikel  
@@ -46,10 +57,12 @@ WHERE anr = (SELECT anr FROM artikel
 ```
 
 
-#### 5.
+#### Aufgabe 5. 
+
 - Die Daten aller lieferungen von Lieferanten aus Hamburg  
--- lieferungen Lieferanten  
--- LNr
+- lieferungen Lieferanten  
+- LNr
+
 ```sql
 SELECT * FROM lieferung  
 WHERE LNr IN (SELECT LNr FROM lieferant  
@@ -57,10 +70,12 @@ WHERE LNr IN (SELECT LNr FROM lieferant
 ```
 
 
-#### 6.
+#### Aufgabe 6. 
+
 - nummern und namen aller lieferanten, die nicht den artikel A05 geliefert haben  
--- lieferant lieferung  
--- LNr
+- lieferant lieferung  
+- LNr
+
 ```sql
 SELECT LNr, LName FROM lieferant  
 WHERE LNr NOT IN( SELECT LNr FROM lieferung  
@@ -69,8 +84,10 @@ WHERE LNr NOT IN( SELECT LNr FROM lieferung
 
 
 
-#### 7. 
+#### Aufgabe 7.  
+
 - Die daten aller Lieferungen von Lieferanten mit einem Status von 20  
+
 ```sql
 SELECT * FROM lieferung  
 WHERE LNr IN (SELECT LNr FROM lieferant   
@@ -78,8 +95,10 @@ WHERE LNr IN (SELECT LNr FROM lieferant 
 ```
 
 
-#### 8.
+#### Aufgabe 8. 
+
 - Nummern aller lieferanten die mindestens einen artikel geliefert haben den auch L03 geliefert hat  
+
 ```sql
 SELECT LNr FROM lieferung  
 WHERE anr IN (SELECT LNr FROM lieferung  
@@ -87,8 +106,10 @@ WHERE anr IN (SELECT LNr FROM lieferung
 ```
 
 
-#### 9.
+#### Aufgabe 9. 
+
 - Namen und nummern aller artikel, die am selben ort wie A03 gelagert werden  
+
 ```sql
 SELECT aname, anr FROM artikel   
 WHERE astadt IN (SELECT astadt FROM artikel  
