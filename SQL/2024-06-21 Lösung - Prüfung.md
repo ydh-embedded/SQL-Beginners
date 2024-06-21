@@ -1,3 +1,4 @@
+
   
 
 # db standard.xls
@@ -73,6 +74,7 @@ ________________________________________________________________________________
 
          WHERE LStadt = 'Ludwigshafen'
 
+
 ```
 
     .
@@ -85,10 +87,7 @@ ________________________________________________________________________________
 
 SELECT LName , LNr FROM lieferant
 
-WHERE status < (SELECT status FROM lieferant
-
-                WHERE LNr  BETWEEN '8' AND '20' );
-
+WHERE status BETWEEN 8 AND 20 ;
 ```
     .
 ### Aufgabe 5.
@@ -133,14 +132,23 @@ WHERE status < (SELECT status FROM lieferant
 
         ORDER BY ANr ASC ;
 
+
+
+
 ```
 
-  
-
-    .
-
-  
-
+  .  oder
+   ```sql
+    Lösung:
+		SELECT anr,
+			 aname,
+			 lnr,
+			 lstadt,
+			 status
+			 FROM lieferant AS A
+			 JOIN artikel AS b ON a.lstadt=b.astadt;
+     ```
+   .
 ### Aufgabe 7.
 
   
@@ -156,6 +164,12 @@ WHERE status < (SELECT status FROM lieferant
         WHERE LNr IN( SELECT LNr FROM lieferant  
 
         WHERE LNr= 'L05');
+
+Lösung:
+	SELECT DISTINCT lnr FROM lieferung 
+		WHERE anr IN (SELECT anr FROM lieferung
+				WHERE lnr='L04')
+				AND lnr!= 'L04';
 
 ```
 
@@ -175,13 +189,18 @@ WHERE status < (SELECT status FROM lieferant
 
 ```sql        
 
-   SELECT LNr AS 'Liefernummer' , LName AS 'Liefername' FROM Lieferant
-
+   SELECT    LNr AS 'Liefernummer' ,
+		   LName AS 'Liefername'       FROM Lieferant
     WHERE LNr IN (SELECT LNr FROM Lieferung
-
                 GROUP BY LNr
-
                 HAVING COUNT (DISTINCT ANr) >= '2' ) ;
+Lösung:
+	SELECT lname, lnr FROM lieferant
+		WHERE lnr IN (SELECT lnr FROM lieferung
+		GROUP BY lnr
+	Having COUNT(Distinct anr)>=2);
+
+
 
 ```
 
@@ -204,6 +223,10 @@ WHERE status < (SELECT status FROM lieferant
         WHERE LStadt IN ('Hamburg')
 
         AND NOT LName = '[H,h]%';
+Lösung:
+	SELECT * FROM lieferant 
+		WHERE lstadt='Hamburg' AND lname
+		NOT LIKE '%h%';
 
 ```
 
@@ -241,6 +264,17 @@ WHERE status < (SELECT status FROM lieferant
 
     -- ins Angebot nehmen hat leider nicht funktioniert !
 
+Lösung: 
+
+	SELECT anr,aname,
+		CASE
+		    WHEN amenge <= 400 THEN 'nachbestellen'
+		    WHEN amenge <= 1000 THEN 'ausreichend'
+	        ELSE 'Angebot'
+	    END AS 'Bestand'
+	FROM artikel;
+
+
 ```
 
   
@@ -262,6 +296,12 @@ WHERE status < (SELECT status FROM lieferant
     SELECT sum(LMenge) AS 'Gesamtliefermenge' FROM lieferung
 
         WHERE ANr = 'A01';
+
+Lösung:
+	SELECT SUM(lmenge) FROm lieferung
+		WHERE anr='A01'
+		AND lnr='L04';
+
 
 ```
 
@@ -289,6 +329,10 @@ WHERE status < (SELECT status FROM lieferant
 
         WHERE status > '30';
 
+Lösung:
+	SELECT lnr, lname FROM lieferant
+		WHERE status > (SELECT status FROM lieferant
+						WHERE lnr='L05');
 ```
 
   
@@ -320,6 +364,11 @@ WHERE status < (SELECT status FROM lieferant
             WHERE a.ANr != 'A04'
 
         ORDER BY a.ANr ASC ;
+Lösung:
+	SELECT lnr, lname, status FROM lieferant
+		WHERE lnr NOT IN(SELECT lnr FROM lieferung
+						WHERE anr='A04');
+
 
 ```
 
@@ -342,6 +391,9 @@ WHERE status < (SELECT status FROM lieferant
     SELECT AVG(LMenge) AS 'Durchschnittliche Liefermnege in Stück' FROM lieferung
 
         WHERE ANr= 'A01';
+Lösung:
+	SELECT AVG(lmenge) FROM lieferung
+		WHERE anr='A01';
 
 ```
 
@@ -379,6 +431,11 @@ SELECT a.LStadt AS 'Lagerort' ,
 
     ORDER BY  a.LNr DESC ;
 
+Lösung:
+	SELECT DISTINCT astadt FROM artikel
+		WHERE anr IN (SELECT anr FROM lieferung 
+					  WHERE lnr='L01');
+
 ```
 
   
@@ -411,6 +468,13 @@ SELECT DISTINCT a.LName AS 'Lieferant' ,
 
  WHERE a.Status > (SELECT MIN(Status) FROM Lieferant);
 
+Lösung:
+SELECT * FROM lieferant
+WHERE lnr IN (SELECT lnr FROM lieferung
+				GROUP BY lnr
+				HAVING COUNT(anr) >= (SELECT COUNT(*) FROM artikel));
+
+
 ```
 
   
@@ -440,6 +504,11 @@ SELECT b.LMenge , a.LStadt , c.AName , c.ANr AS 'Lieferstatus' FROM Lieferant a
     WHERE LStadt = 'Ludwigshafen' AND  b.LDatum
 
 BETWEEN '01.08.1990' AND getdate();
+
+Lösung:
+SELECT COUNT(*) FROM lieferung AS a JOIN lieferant AS b
+	ON a.lnr=b.lnr
+	WHERE a.ldatum>='01.08.1990' AND b.lstadt='Ludwigshafen';
 
 ```
 
@@ -472,6 +541,14 @@ SELECT DISTINCT a.ANr AS 'Artikel-Nummern' ,
 
                         WHERE ANr = 'A03');
 
+Lösung:
+SELECT anr, aname FROM artikel
+	WHERE anr IN (SELECT anr FROM lieferung
+				GROUP BY anr
+				HAVING AVG(lmenge)<(SELECT AVG(lmenge) FROm lieferung
+				WHERE anr='A03'));
+
+
 ```
 
     .
@@ -502,6 +579,15 @@ SELECT DISTINCT a.ANr AS 'Artikel-Nummern' ,
         JOIN lieferung b ON a.lnr = b.lnr
 
         AND status >ANY (SELECT status FROM lieferant);
+
+Lösung:
+
+SELECT lnr, lname, lstadt FROM lieferant 
+	WHERE lnr IN (SELECT lnr FROM lieferung
+					GROUP by lnr
+					HAVING count(lnr)>=2)
+	AND status > (SELECT min(status) FROM lieferant);
+
 
 ```
 
@@ -549,6 +635,24 @@ SELECT DISTINCT a.ANr AS 'Artikel-Nummern' ,
 
      WHERE ANr = 'A05' ;
 
+Lösung: 1
+SELECT  'Die ' + aname +
+		'mit der Artikelnummer ' + anr +
+		' ist ' + farbe +
+		' und wiegt ' +str(gewicht)+
+		' Gramm, sie wird in '+astadt+
+		' gelagert.'      FROM artikel
+		WHERE anr='A05';
+
+Lösung: 2
+SELECT  'Die ' +aname+
+		' mit der Artikelnummer ' +anr+
+		' ist ' +farbe+
+		'und wiegt ', gewicht,
+		' Gramm, sie wird in ' +astadt+
+		'gelagert.'		FROM artikel
+		WHERE anr = 'A05';
+
 ```
 
   
@@ -581,6 +685,10 @@ SELECT DISTINCT a.ANr AS 'Artikel-Nummern' ,
 
     VALUES ( 'A38' , 'Passierschein' , 'blau' , '10' , 'Erfurt' , NULL ) ;
 
+
+Lösung:
+	INSERT INTO artikel
+	Values('A38', 'Passierschein' , 'blau', 10, 'Erfurt', NULL);
 ```
 
   
@@ -604,15 +712,10 @@ Notenschlüssel 
   
 
 0P – 23P = 6 
-
 24P – 39P = 5 
-
 40P – 53P = 4 
-
 54P – 63P = 3 
-
 64P – 72P = 2 
-
 71P – 80P = 1
 
   
