@@ -26,7 +26,7 @@ Befehle:
 - wir erstellen einen neuen  Besitzer (user) : ***danny***
 
 ```sql
-	CREATE User danny WITH PASSWORD 'r2d2c3po' ;
+	CREATE User danny WITH PASSWORD 'Sicheres-Passwort' ;
 ```
 
 .
